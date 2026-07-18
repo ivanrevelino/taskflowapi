@@ -12,5 +12,9 @@ spring:
       ddl-auto: update
     show-sql: true
 
+jwt:
+  secret: o30dcKlaPgd4K833WI9GgVcqYUvZEqaA
+  expiration: 3600
+
 server:
   port: 8080
