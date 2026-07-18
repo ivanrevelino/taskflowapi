@@ -9,6 +9,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Optional;
 
@@ -70,7 +71,7 @@ class UserRepositoryTest {
         User user = Generator.generateUser();
         repository.save(user);
 
-        Optional<User> found = repository.findByUsername(user.getUsername());
+        Optional<UserDetails> found = repository.findByUsername(user.getUsername());
 
         assertThat(found).isPresent();
         assertThat(found.get().getUsername()).isEqualTo(user.getUsername());
@@ -79,7 +80,7 @@ class UserRepositoryTest {
     @Test
     @DisplayName("Should return empty when login does not exist")
     void shouldReturnEmptyWhenLoginDoesNotExist() {
-        Optional<User> found = repository.findByUsername("login.que.nao.existe@email.com");
+        Optional<UserDetails> found = repository.findByUsername("login.que.nao.existe@email.com");
         assertThat(found).isEmpty();
     }
 
