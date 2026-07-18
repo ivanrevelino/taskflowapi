@@ -15,8 +15,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-
 @Service
 @RequiredArgsConstructor
 public class UserService {
@@ -37,7 +35,7 @@ public class UserService {
         return userMapper.toDTO(saved);
     }
 
-    public UserResponseDTO findByIdOrThrowResourceNotFoundException(Long id) {
+    public UserResponseDTO findById(Long id) {
         if (id <= 0) throw new BadRequestException("Invalid value");
         User user = repository.findById(id).orElseThrow(() -> new ResourceNotFoundException("User not found"));
         return userMapper.toDTO(user);
@@ -45,11 +43,11 @@ public class UserService {
 
     public void delete(Long id) {
         if (id <= 0) throw new BadRequestException("Invalid value");
-        User userToBeDeleted = findById(id);
+        User userToBeDeleted = findByIdOrElseThrowResourceNotFoundException(id);
         repository.delete(userToBeDeleted);
     }
 
-    private User findById(Long id) {
+    public User findByIdOrElseThrowResourceNotFoundException(Long id) {
         if (id <= 0) throw new BadRequestException("Invalid value");
         return repository.findById(id).orElseThrow(() -> new ResourceNotFoundException("User not found"));
     }
