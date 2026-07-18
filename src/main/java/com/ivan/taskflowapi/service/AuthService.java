@@ -2,12 +2,13 @@ package com.ivan.taskflowapi.service;
 
 import com.ivan.taskflowapi.dto.auth.AuthLoginDTO;
 import com.ivan.taskflowapi.dto.auth.AuthRegisterDTO;
+import com.ivan.taskflowapi.dto.auth.LoginResponse;
 import com.ivan.taskflowapi.dto.user.UserResponseDTO;
 import com.ivan.taskflowapi.models.User;
 import com.ivan.taskflowapi.models.enums.UserRoles;
 import com.ivan.taskflowapi.repository.UserRepository;
+import com.ivan.taskflowapi.security.jwt.JWTTokenProvider;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -21,12 +22,17 @@ public class AuthService {
     private final UserRepository userRepository;
     private final AuthenticationManager authenticationManager;
     private final BCryptPasswordEncoder passwordEncoder;
+    private final JWTTokenProvider tokenProvider;
 
-    public String login(AuthLoginDTO dto) {
+    public LoginResponse login(AuthLoginDTO dto) {
 
         var usernamePassword = new UsernamePasswordAuthenticationToken(dto.username(), dto.password());
         Authentication authenticated = authenticationManager.authenticate(usernamePassword);
-        return " ";
+
+        User user = (User) authenticated.getPrincipal();
+        assert user != null;
+        String token = tokenProvider.generate(user);
+        return new LoginResponse(token);
     }
 
     public UserResponseDTO register(AuthRegisterDTO dto) {

@@ -13,6 +13,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -50,5 +51,9 @@ public class UserService {
     public User findByIdOrElseThrowResourceNotFoundException(Long id) {
         if (id <= 0) throw new BadRequestException("Invalid value");
         return repository.findById(id).orElseThrow(() -> new ResourceNotFoundException("User not found"));
+    }
+
+    public User getAuthenticatedUser() {
+        return (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     }
 }

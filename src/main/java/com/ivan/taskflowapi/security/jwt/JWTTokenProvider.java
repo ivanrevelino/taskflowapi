@@ -13,11 +13,11 @@ import java.time.Instant;
 @Service
 public class JWTTokenProvider {
 
-    @Value("{jwt.secret}")
-    String secret;
+    @Value("${jwt.secret}")
+    private String secret;
 
-    @Value("{jwt.expiration}")
-    long expiration;
+    @Value("${jwt.expiration}")
+    private long expiration;
 
     public String generate(User user) {
 
