@@ -6,6 +6,7 @@ import com.ivan.taskflowapi.exception.BadRequestException;
 import com.ivan.taskflowapi.exception.ResourceNotFoundException;
 import com.ivan.taskflowapi.mapper.UserMapper;
 import com.ivan.taskflowapi.models.User;
+import com.ivan.taskflowapi.models.enums.UserRoles;
 import com.ivan.taskflowapi.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
@@ -31,6 +32,7 @@ public class UserService {
     public UserResponseDTO save(@Valid  UserRequestDTO requestDTO) {
 
         User entity = userMapper.toEntity(requestDTO);
+        entity.setRole(UserRoles.USER);
         User saved = repository.save(entity);
         return userMapper.toDTO(saved);
     }
