@@ -45,8 +45,8 @@ public class AuthService {
                 .name(dto.name())
                 .username(dto.username())
                 .password(encodedPassword)
-                .role(UserRoles.ADMIN).build();
+                .role(UserRoles.USER).build();
         User saved = userRepository.save(user);
-        return new UserResponseDTO(saved.getName(), saved.getUsername(), saved.getRole());
+        return UserResponseDTO.builder().name(saved.getName()).username(saved.getUsername()).build();
     }
 }

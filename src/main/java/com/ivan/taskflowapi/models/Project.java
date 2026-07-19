@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -34,5 +35,6 @@ public class Project {
     @OneToMany(mappedBy = "project")
     private List<Task> tasks = new ArrayList<>();
 
+    @CreationTimestamp
     private LocalDateTime createdAt;
 }

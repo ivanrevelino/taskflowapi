@@ -1,7 +1,9 @@
 package com.ivan.taskflowapi.service;
 
 import com.ivan.taskflowapi.dto.project.ProjectRequestDTO;
+import com.ivan.taskflowapi.dto.project.ProjectResponseDTO;
 import com.ivan.taskflowapi.exception.BadRequestException;
+import com.ivan.taskflowapi.exception.ResourceNotFoundException;
 import com.ivan.taskflowapi.exception.UnauthorizedException;
 import com.ivan.taskflowapi.mapper.ProjectMapper;
 import com.ivan.taskflowapi.models.Project;
@@ -10,6 +12,8 @@ import com.ivan.taskflowapi.repository.ProjectRepository;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
@@ -23,17 +27,20 @@ public class ProjectService {
     private final UserService userService;
     private final ProjectMapper projectMapper;
 
+    public List<ProjectResponseDTO> findMyProjects() {
+        User user = userService.getAuthenticatedUser();
+        return repository.findByOwner(user).stream().map(projectMapper::toDTO).toList();
+    }
+
     @Transactional
     public Project create(@Valid  ProjectRequestDTO request) {
+
         User owner = userService.getAuthenticatedUser();
 
-        Project project = new Project();
-        project.setName(request.name());
-        project.setDescription(request.description());
-        project.setOwner(owner);
+        Project projectToBeSaved = projectMapper.toEntity(request);
+        projectToBeSaved.setOwner(owner);
 
-        Project entity = projectMapper.toEntity(request);
-        return repository.save(entity);
+        return repository.save(projectToBeSaved);
     }
 
     public Project findByIdOrThrowResourceNotFoundException(Long id) {
@@ -47,6 +54,23 @@ public class ProjectService {
         return project;
     }
 
+    @Transactional
+    public void deleteWithOwnershipCheck(Long id) {
+        if (id <= 0) throw new BadRequestException("Invalid argument");
+        Project project = findByIdOrThrowResourceNotFoundException(id);
+
+        repository.delete(project);
+    }
+
+    public Page<Project> findAll(Pageable pageable) {
+        return repository.findAll(pageable);
+    }
+
+    public Project findById(Long id) {
+        return repository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Project not found"));
+    }
+
     @PreAuthorize("hasRole('ADMIN')")
     public List<Project> findByOwnerId(Long id) {
         if (id <= 0) throw new BadRequestException("Invalid argument");
@@ -54,19 +78,8 @@ public class ProjectService {
         return repository.findByOwner(user);
     }
 
-    public void delete(Long id) {
-        if (id <= 0) throw new BadRequestException("Invalid argument");
-
-        Project project = findByIdOrThrowResourceNotFoundException(id);
-        User owner = userService.getAuthenticatedUser();
-
-        verificateIfUserIsOwnerOfTheProject(project, owner);
-
-        repository.delete(project);
-    }
-
     private static void verificateIfUserIsOwnerOfTheProject(Project project, User owner) {
-        if ((project.getOwner().getId().equals(owner.getId()))) {
+        if (!(project.getOwner().getId().equals(owner.getId()))) {
             throw new UnauthorizedException("You're not authorized to execute this function");
         }
     }
