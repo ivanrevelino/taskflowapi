@@ -4,7 +4,7 @@ import com.ivan.taskflowapi.dto.project.ProjectRequestDTO;
 import com.ivan.taskflowapi.dto.project.ProjectResponseDTO;
 import com.ivan.taskflowapi.exception.BadRequestException;
 import com.ivan.taskflowapi.exception.ResourceNotFoundException;
-import com.ivan.taskflowapi.exception.UnauthorizedException;
+import com.ivan.taskflowapi.exception.ForbiddenException;
 import com.ivan.taskflowapi.mapper.ProjectMapper;
 import com.ivan.taskflowapi.models.Project;
 import com.ivan.taskflowapi.models.User;
@@ -80,7 +80,7 @@ public class ProjectService {
 
     private static void verificateIfUserIsOwnerOfTheProject(Project project, User owner) {
         if (!(project.getOwner().getId().equals(owner.getId()))) {
-            throw new UnauthorizedException("You're not authorized to execute this function");
+            throw new ForbiddenException("You're not authorized to execute this function");
         }
     }
 }

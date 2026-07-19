@@ -4,7 +4,7 @@ import com.ivan.taskflowapi.dto.task.TaskRequestDTO;
 import com.ivan.taskflowapi.dto.task.TaskResponseDTO;
 import com.ivan.taskflowapi.exception.BadRequestException;
 import com.ivan.taskflowapi.exception.ResourceNotFoundException;
-import com.ivan.taskflowapi.exception.UnauthorizedException;
+import com.ivan.taskflowapi.exception.ForbiddenException;
 import com.ivan.taskflowapi.mapper.TaskMapper;
 import com.ivan.taskflowapi.models.Project;
 import com.ivan.taskflowapi.models.Task;
@@ -13,7 +13,6 @@ import com.ivan.taskflowapi.repository.TaskRepository;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -71,7 +70,7 @@ public class TaskService {
 
     private static void validateProjectOwnership(Project project, User owner) {
         if (!project.getOwner().getId().equals(owner.getId())){
-            throw new UnauthorizedException("\"You don't own this project\"");
+            throw new ForbiddenException("\"You don't own this project\"");
         }
     }
 }
