@@ -69,19 +69,19 @@ class UserRepositoryTest {
     @DisplayName("Should find user by login")
     void shouldFindUserByLogin() {
         User user = Generator.generateUser();
-        repository.save(user);
+        User saved = repository.save(user);
 
-        Optional<UserDetails> found = repository.findByUsername(user.getUsername());
+        UserDetails userFound = repository.findByUsername(user.getUsername());
 
-        assertThat(found).isPresent();
-        assertThat(found.get().getUsername()).isEqualTo(user.getUsername());
+        assertThat(userFound).isNotNull();
+        assertThat(userFound.getUsername()).isEqualTo(saved.getUsername());
     }
 
     @Test
     @DisplayName("Should return empty when login does not exist")
     void shouldReturnEmptyWhenLoginDoesNotExist() {
-        Optional<UserDetails> found = repository.findByUsername("login.que.nao.existe@email.com");
-        assertThat(found).isEmpty();
+        UserDetails found = repository.findByUsername("login.que.nao.existe@email.com");
+        assertThat(found).isNull();
     }
 
     @Test

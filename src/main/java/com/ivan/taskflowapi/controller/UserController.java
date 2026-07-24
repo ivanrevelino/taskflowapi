@@ -3,8 +3,11 @@ package com.ivan.taskflowapi.controller;
 import com.ivan.taskflowapi.dto.user.UserRequestDTO;
 import com.ivan.taskflowapi.dto.user.UserResponseDTO;
 import com.ivan.taskflowapi.service.UserService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -21,7 +24,8 @@ public class UserController {
 
     @GetMapping
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public Page<UserResponseDTO> listAll(Pageable pageable) {
+    @Operation(summary = "List all users paginated")
+    public Page<UserResponseDTO> listAll(@ParameterObject Pageable pageable) {
         return userService.listAll(pageable);
     }
 
