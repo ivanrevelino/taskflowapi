@@ -1,10 +1,14 @@
 spring:
+
+  config:
+    import: optional:file:.env[.properties]
+
   application:
     name: taskflowapi
   datasource:
-    url: "jdbc:postgresql://localhost:5432/taskflow_db"
-    username: postgres
-    password: 122485
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
     driver-class-name: org.postgresql.Driver
 
   jpa:
@@ -13,7 +17,7 @@ spring:
     show-sql: true
 
 jwt:
-  secret: o30dcKlaPgd4K833WI9GgVcqYUvZEqaA
+  secret: ${JWT_SECRET}
   expiration: 3600
 
 server:
