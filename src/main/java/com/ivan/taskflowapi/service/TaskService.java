@@ -29,8 +29,10 @@ public class TaskService {
 
     @Transactional
     public Task create(@Valid TaskRequestDTO request, Long projectId) {
+
         User owner = userService.getAuthenticatedUser();
-        Project project = projectService.findByIdOrThrowResourceNotFoundException(projectId);
+        Project project = projectService.findMyProjectById(projectId);
+
         validateProjectOwnership(project, owner);
 
         Task taskToBeSaved = Task.builder().title(request.title()).description(request.description()).project(project).build();
@@ -39,19 +41,27 @@ public class TaskService {
     }
 
     public List<TaskResponseDTO> findMyTasks(Long projectId) {
+
         User owner = userService.getAuthenticatedUser();
-        Project project = projectService.findByIdOrThrowResourceNotFoundException(projectId);
+        Project project = projectService.findMyProjectById(projectId);
+
         validateProjectOwnership(project, owner);
+
         return repository.findByProjectId(projectId).stream().map(taskMapper::toDTO).toList();
     }
 
     public Task findByIdOrThrowResourceNotFoundException(Long id) {
-        return repository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Task Not Found"));
+        return repository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Task Not Found"));
     }
 
     @Transactional
     public TaskResponseDTO completeTask(Long projectId, Long taskId) {
-        Project project = projectService.findById(projectId);
+        User owner = userService.getAuthenticatedUser();
+        Project project = projectService.findMyProjectById(projectId);
+
+        validateProjectOwnership(project, owner);
+
         Task task = findByIdOrThrowResourceNotFoundException(taskId);
 
         if (!task.getProject().getId().equals(project.getId())) {
@@ -65,7 +75,7 @@ public class TaskService {
 
     public List<Task> groupByStatus(TaskStatus status, Long projectId) {
 
-        Project project = projectService.findByIdOrThrowResourceNotFoundException(projectId);
+        Project project = projectService.findMyProjectById(projectId);
         User owner = userService.getAuthenticatedUser();
 
         validateProjectOwnership(project, owner);
@@ -76,7 +86,7 @@ public class TaskService {
     public void delete(Long taskId, Long projectId) {
 
         User owner = userService.getAuthenticatedUser();
-        Project project = projectService.findByIdOrThrowResourceNotFoundException(projectId);
+        Project project = projectService.findMyProjectById(projectId);
 
         validateProjectOwnership(project, owner);
 

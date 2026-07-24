@@ -43,13 +43,13 @@ public class ProjectService {
         return repository.save(projectToBeSaved);
     }
 
-    public Project findByIdOrThrowResourceNotFoundException(Long id) {
+    public Project findMyProjectById(Long id) {
         if (id <= 0) throw new BadRequestException("Invalid argument");
 
         User owner = userService.getAuthenticatedUser();
         Project project = repository.findById(id).orElseThrow(() -> new BadRequestException("Project not found"));
 
-        verificateIfUserIsOwnerOfTheProject(project, owner);
+        verifyUserIsProjectOwner(project, owner);
 
         return project;
     }
@@ -57,7 +57,7 @@ public class ProjectService {
     @Transactional
     public void deleteWithOwnershipCheck(Long id) {
         if (id <= 0) throw new BadRequestException("Invalid argument");
-        Project project = findByIdOrThrowResourceNotFoundException(id);
+        Project project = findMyProjectById(id);
 
         repository.delete(project);
     }
@@ -78,7 +78,7 @@ public class ProjectService {
         return repository.findByOwner(user);
     }
 
-    private static void verificateIfUserIsOwnerOfTheProject(Project project, User owner) {
+    private static void verifyUserIsProjectOwner(Project project, User owner) {
         if (!(project.getOwner().getId().equals(owner.getId()))) {
             throw new ForbiddenException("You're not authorized to execute this function");
         }

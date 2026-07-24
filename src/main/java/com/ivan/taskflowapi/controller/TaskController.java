@@ -37,8 +37,8 @@ public class TaskController {
         return new ResponseEntity<>(response, HttpStatus.ACCEPTED);
     }
 
-    @GetMapping
-    public ResponseEntity<List<Task>> groupByStatus(@RequestParam(value = "status") TaskStatus status, Long projectId) {
+    @GetMapping("/filter")
+    public ResponseEntity<List<Task>> groupByStatus(@RequestParam(value = "status") TaskStatus status, @PathVariable Long projectId) {
         List<Task> tasks = taskService.groupByStatus(status, projectId);
         return ResponseEntity.ok(tasks);
     }

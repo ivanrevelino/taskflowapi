@@ -36,7 +36,7 @@ public class ProjectController {
 
     @GetMapping("/{id}")
     public ResponseEntity<Project> findByIdWithOwnershipCheck(@PathVariable Long id) {
-        Project project = projectService.findByIdOrThrowResourceNotFoundException(id);
+        Project project = projectService.findMyProjectById(id);
         return new ResponseEntity<>(project, HttpStatus.OK);
     }
 
@@ -45,19 +45,5 @@ public class ProjectController {
         projectService.deleteWithOwnershipCheck(id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
-
-    // ADMIN
-    @GetMapping("/admin/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Project> findByIdWithoutOwnershipCheck(@PathVariable Long id) {
-        Project project = projectService.findById(id);
-        return new ResponseEntity<>(project, HttpStatus.OK);
-    }
-
-    @GetMapping("/admin/all")
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public Page<Project> findAll(Pageable pageable) {
-        return projectService.findAll(pageable);
-    }
-
+    
 }
