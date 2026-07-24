@@ -9,6 +9,7 @@ import com.ivan.taskflowapi.models.enums.UserRoles;
 import com.ivan.taskflowapi.repository.UserRepository;
 import com.ivan.taskflowapi.security.jwt.JWTTokenProvider;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class AuthService {
 
     private final UserRepository userRepository;
@@ -32,12 +34,16 @@ public class AuthService {
         User user = (User) authenticated.getPrincipal();
         assert user != null;
         String token = tokenProvider.generate(user);
+        log.info("LOGIN SUCCESS - userId: {} | username: {} | role: {}", user.getId(), user.getUsername(), user.getRole());
         return new LoginResponse(token);
     }
 
     public UserResponseDTO register(AuthRegisterDTO dto) {
 
-        if (userRepository.findByUsername(dto.username()) != null) throw new RuntimeException("User already exists");
+        if (userRepository.findByUsername(dto.username()) != null){
+            log.warn("REGISTRATION FAILED - username already exists: {}", dto.username());
+            throw new RuntimeException("User already exists");
+        }
 
         String encodedPassword = passwordEncoder.encode(dto.password());
 
@@ -47,6 +53,7 @@ public class AuthService {
                 .password(encodedPassword)
                 .role(UserRoles.USER).build();
         User saved = userRepository.save(user);
+        log.info("REGISTRATION SUCCESS - userId: {} | username: {} | role: {}", saved.getId(), saved.getUsername(), saved.getRole());
         return UserResponseDTO.builder().name(saved.getName()).username(saved.getUsername()).build();
     }
 }

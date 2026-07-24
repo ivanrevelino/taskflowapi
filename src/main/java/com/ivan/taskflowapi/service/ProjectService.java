@@ -12,6 +12,7 @@ import com.ivan.taskflowapi.repository.ProjectRepository;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -21,6 +22,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ProjectService {
 
     private final ProjectRepository repository;
@@ -40,7 +42,12 @@ public class ProjectService {
         Project projectToBeSaved = projectMapper.toEntity(request);
         projectToBeSaved.setOwner(owner);
 
-        return repository.save(projectToBeSaved);
+        Project saved = repository.save(projectToBeSaved);
+
+        log.info("CREATION SUCCESS - User(id: {}, username: {}) created Project(id: {}, name: {}, description: {})",
+                owner.getId(), owner.getUsername(), saved.getId(), saved.getName(), saved.getDescription());
+
+        return saved;
     }
 
     public Project findMyProjectById(Long id) {
@@ -58,6 +65,9 @@ public class ProjectService {
     public void deleteWithOwnershipCheck(Long id) {
         if (id <= 0) throw new BadRequestException("Invalid argument");
         Project project = findMyProjectById(id);
+
+        log.info("DELETE SUCCESS - User(id: {}, username: {}) deleted Project(id: {}, name: {})",
+                project.getOwner().getId(), project.getOwner().getUsername(), project.getId(), project.getName());
 
         repository.delete(project);
     }

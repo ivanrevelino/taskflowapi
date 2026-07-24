@@ -14,12 +14,14 @@ import com.ivan.taskflowapi.repository.TaskRepository;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class TaskService {
 
     private final TaskRepository repository;
@@ -37,7 +39,11 @@ public class TaskService {
 
         Task taskToBeSaved = Task.builder().title(request.title()).description(request.description()).project(project).build();
         taskToBeSaved.setStatus(TaskStatus.TO_DO);
-        return repository.save(taskToBeSaved);
+        Task saved = repository.save(taskToBeSaved);
+
+        log.info("CREATION SUCCESS - User(id: {}, username: {}) created Task(id: {}, title: {}) for Project(id: {}, name: {})",
+                owner.getId(), owner.getUsername(), saved.getId(), saved.getTitle(), project.getId(), project.getName());
+        return saved;
     }
 
     public List<TaskResponseDTO> findMyTasks(Long projectId) {
