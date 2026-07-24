@@ -9,6 +9,7 @@ import com.ivan.taskflowapi.mapper.TaskMapper;
 import com.ivan.taskflowapi.models.Project;
 import com.ivan.taskflowapi.models.Task;
 import com.ivan.taskflowapi.models.User;
+import com.ivan.taskflowapi.models.enums.TaskStatus;
 import com.ivan.taskflowapi.repository.TaskRepository;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
@@ -27,29 +28,49 @@ public class TaskService {
     private final TaskMapper taskMapper;
 
     @Transactional
-    public Task create(@Valid  TaskRequestDTO request, Long projectId) {
+    public Task create(@Valid TaskRequestDTO request, Long projectId) {
         User owner = userService.getAuthenticatedUser();
         Project project = projectService.findByIdOrThrowResourceNotFoundException(projectId);
         validateProjectOwnership(project, owner);
 
-        return Task.builder().title(request.title())
-                .description(request.description())
-                .project(project)
-                .build();
+        Task taskToBeSaved = Task.builder().title(request.title()).description(request.description()).project(project).build();
+        taskToBeSaved.setStatus(TaskStatus.TO_DO);
+        return repository.save(taskToBeSaved);
     }
 
     public List<TaskResponseDTO> findMyTasks(Long projectId) {
         User owner = userService.getAuthenticatedUser();
         Project project = projectService.findByIdOrThrowResourceNotFoundException(projectId);
         validateProjectOwnership(project, owner);
-        return repository.findByProjectId(projectId)
-                .stream()
-                .map(taskMapper::toDTO).toList();
+        return repository.findByProjectId(projectId).stream().map(taskMapper::toDTO).toList();
     }
 
     public Task findByIdOrThrowResourceNotFoundException(Long id) {
-        return repository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Task Not Found"));
+        return repository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Task Not Found"));
+    }
+
+    @Transactional
+    public TaskResponseDTO completeTask(Long projectId, Long taskId) {
+        Project project = projectService.findById(projectId);
+        Task task = findByIdOrThrowResourceNotFoundException(taskId);
+
+        if (!task.getProject().getId().equals(project.getId())) {
+            throw new ForbiddenException("You cannot complete this task");
+        }
+
+        task.setStatus(TaskStatus.COMPLETED);
+        Task saved = repository.save(task);
+        return new TaskResponseDTO(saved.getId(), saved.getTitle(), saved.getDescription(), saved.getStatus());
+    }
+
+    public List<Task> groupByStatus(TaskStatus status, Long projectId) {
+
+        Project project = projectService.findByIdOrThrowResourceNotFoundException(projectId);
+        User owner = userService.getAuthenticatedUser();
+
+        validateProjectOwnership(project, owner);
+
+        return repository.findByProjectIdAndStatus(projectId, status);
     }
 
     public void delete(Long taskId, Long projectId) {
@@ -69,7 +90,7 @@ public class TaskService {
     }
 
     private static void validateProjectOwnership(Project project, User owner) {
-        if (!project.getOwner().getId().equals(owner.getId())){
+        if (!project.getOwner().getId().equals(owner.getId())) {
             throw new ForbiddenException("\"You don't own this project\"");
         }
     }

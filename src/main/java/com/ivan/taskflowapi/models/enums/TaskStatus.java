@@ -2,6 +2,7 @@ package com.ivan.taskflowapi.models.enums;
 
 public enum TaskStatus {
 
-    PENDING,
+    TO_DO,
+    IN_PROGRESS,
     COMPLETED
 }

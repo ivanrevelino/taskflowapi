@@ -1,5 +1,6 @@
 package com.ivan.taskflowapi.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.ivan.taskflowapi.models.enums.TaskStatus;
 import jakarta.persistence.*;
 import lombok.*;
@@ -28,10 +29,11 @@ public class Task {
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
-    private TaskStatus status = TaskStatus.PENDING;
+    private TaskStatus status = TaskStatus.TO_DO;
 
     @ManyToOne
     @JoinColumn(name = "project_id")
+    @JsonIgnore
     private Project project;
 
     @CreationTimestamp

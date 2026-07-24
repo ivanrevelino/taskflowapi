@@ -3,6 +3,7 @@ package com.ivan.taskflowapi.controller;
 import com.ivan.taskflowapi.dto.task.TaskRequestDTO;
 import com.ivan.taskflowapi.dto.task.TaskResponseDTO;
 import com.ivan.taskflowapi.models.Task;
+import com.ivan.taskflowapi.models.enums.TaskStatus;
 import com.ivan.taskflowapi.service.TaskService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -28,6 +29,18 @@ public class TaskController {
     public ResponseEntity<Task> create(@PathVariable Long projectId, @RequestBody TaskRequestDTO dto) {
         Task task = taskService.create(dto, projectId);
         return new ResponseEntity<>(task, HttpStatus.CREATED);
+    }
+
+    @PatchMapping("/{taskId}")
+    public ResponseEntity<TaskResponseDTO> completeTask(@PathVariable Long taskId, @PathVariable Long projectId) {
+        TaskResponseDTO response = taskService.completeTask(projectId, taskId);
+        return new ResponseEntity<>(response, HttpStatus.ACCEPTED);
+    }
+
+    @GetMapping
+    public ResponseEntity<List<Task>> groupByStatus(@RequestParam(value = "status") TaskStatus status, Long projectId) {
+        List<Task> tasks = taskService.groupByStatus(status, projectId);
+        return ResponseEntity.ok(tasks);
     }
 
     @DeleteMapping("/{taskId}")
