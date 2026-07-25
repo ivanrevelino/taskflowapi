@@ -5,6 +5,9 @@ import com.ivan.taskflowapi.dto.auth.AuthRegisterDTO;
 import com.ivan.taskflowapi.dto.auth.LoginResponse;
 import com.ivan.taskflowapi.dto.user.UserResponseDTO;
 import com.ivan.taskflowapi.service.AuthService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -22,6 +25,10 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/login")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "When successful")
+    })
+    @Operation(summary = "Login", description = "Make's login and return a token JWT")
     public ResponseEntity<LoginResponse> login(@RequestBody @Valid AuthLoginDTO dto) {
 
         LoginResponse loginResponse = authService.login(dto);
@@ -29,6 +36,11 @@ public class AuthController {
     }
 
     @PostMapping("/register")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "When successful"),
+            @ApiResponse(responseCode = "400", description = "When user already exists")
+    })
+    @Operation(summary = "Register a new User", description = "Register a new user in the system")
     public ResponseEntity<UserResponseDTO> register(@RequestBody @Valid AuthRegisterDTO dto){
         UserResponseDTO response = authService.register(dto);
         return new ResponseEntity<>(response, HttpStatus.CREATED);

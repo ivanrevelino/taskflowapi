@@ -6,16 +6,13 @@ import com.ivan.taskflowapi.models.Project;
 import com.ivan.taskflowapi.service.ProjectService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@RequestMapping("/project")
+@RequestMapping("/projects")
 @RestController
 @RequiredArgsConstructor
 public class ProjectController {
@@ -29,20 +26,20 @@ public class ProjectController {
     }
 
     @PostMapping
-    public ResponseEntity<Project> create(@RequestBody @Valid ProjectRequestDTO request) {
-        Project project = projectService.create(request);
+    public ResponseEntity<ProjectResponseDTO> create(@RequestBody @Valid ProjectRequestDTO request) {
+        ProjectResponseDTO project = projectService.create(request);
         return new ResponseEntity<>(project, HttpStatus.CREATED);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Project> findByIdWithOwnershipCheck(@PathVariable Long id) {
-        Project project = projectService.findMyProjectById(id);
+    public ResponseEntity<ProjectResponseDTO> findById(@PathVariable @Valid Long id) {
+        ProjectResponseDTO project = projectService.findByIdResponseDTO(id);
         return new ResponseEntity<>(project, HttpStatus.OK);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
-        projectService.deleteWithOwnershipCheck(id);
+        projectService.delete(id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
     

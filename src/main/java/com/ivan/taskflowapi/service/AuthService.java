@@ -4,6 +4,7 @@ import com.ivan.taskflowapi.dto.auth.AuthLoginDTO;
 import com.ivan.taskflowapi.dto.auth.AuthRegisterDTO;
 import com.ivan.taskflowapi.dto.auth.LoginResponse;
 import com.ivan.taskflowapi.dto.user.UserResponseDTO;
+import com.ivan.taskflowapi.exception.BadRequestException;
 import com.ivan.taskflowapi.models.User;
 import com.ivan.taskflowapi.models.enums.UserRoles;
 import com.ivan.taskflowapi.repository.UserRepository;
@@ -42,7 +43,7 @@ public class AuthService {
 
         if (userRepository.findByUsername(dto.username()) != null){
             log.warn("REGISTRATION FAILED - username already exists: {}", dto.username());
-            throw new RuntimeException("User already exists");
+            throw new BadRequestException("User already exists");
         }
 
         String encodedPassword = passwordEncoder.encode(dto.password());

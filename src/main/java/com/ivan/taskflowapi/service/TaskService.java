@@ -33,7 +33,7 @@ public class TaskService {
     public Task create(@Valid TaskRequestDTO request, Long projectId) {
 
         User owner = userService.getAuthenticatedUser();
-        Project project = projectService.findMyProjectById(projectId);
+        Project project = projectService.findById(projectId);
 
         validateProjectOwnership(project, owner);
 
@@ -49,7 +49,7 @@ public class TaskService {
     public List<TaskResponseDTO> findMyTasks(Long projectId) {
 
         User owner = userService.getAuthenticatedUser();
-        Project project = projectService.findMyProjectById(projectId);
+        Project project = projectService.findById(projectId);
 
         validateProjectOwnership(project, owner);
 
@@ -64,7 +64,7 @@ public class TaskService {
     @Transactional
     public TaskResponseDTO completeTask(Long projectId, Long taskId) {
         User owner = userService.getAuthenticatedUser();
-        Project project = projectService.findMyProjectById(projectId);
+        Project project = projectService.findById(projectId);
 
         validateProjectOwnership(project, owner);
 
@@ -81,7 +81,7 @@ public class TaskService {
 
     public List<Task> groupByStatus(TaskStatus status, Long projectId) {
 
-        Project project = projectService.findMyProjectById(projectId);
+        Project project = projectService.findById(projectId);
         User owner = userService.getAuthenticatedUser();
 
         validateProjectOwnership(project, owner);
@@ -92,7 +92,7 @@ public class TaskService {
     public void delete(Long taskId, Long projectId) {
 
         User owner = userService.getAuthenticatedUser();
-        Project project = projectService.findMyProjectById(projectId);
+        Project project = projectService.findById(projectId);
 
         validateProjectOwnership(project, owner);
 

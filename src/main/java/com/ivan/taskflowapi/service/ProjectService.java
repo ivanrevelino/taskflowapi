@@ -2,17 +2,20 @@ package com.ivan.taskflowapi.service;
 
 import com.ivan.taskflowapi.dto.project.ProjectRequestDTO;
 import com.ivan.taskflowapi.dto.project.ProjectResponseDTO;
+import com.ivan.taskflowapi.dto.user.UserResponseDTO;
 import com.ivan.taskflowapi.exception.BadRequestException;
-import com.ivan.taskflowapi.exception.ResourceNotFoundException;
 import com.ivan.taskflowapi.exception.ForbiddenException;
 import com.ivan.taskflowapi.mapper.ProjectMapper;
+import com.ivan.taskflowapi.mapper.UserMapper;
 import com.ivan.taskflowapi.models.Project;
 import com.ivan.taskflowapi.models.User;
 import com.ivan.taskflowapi.repository.ProjectRepository;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.jspecify.annotations.NonNull;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -28,6 +31,7 @@ public class ProjectService {
     private final ProjectRepository repository;
     private final UserService userService;
     private final ProjectMapper projectMapper;
+    private final UserMapper userMapper;
 
     public List<ProjectResponseDTO> findMyProjects() {
         User user = userService.getAuthenticatedUser();
@@ -35,23 +39,23 @@ public class ProjectService {
     }
 
     @Transactional
-    public Project create(@Valid  ProjectRequestDTO request) {
-
+    public ProjectResponseDTO create(@Valid  ProjectRequestDTO request) {
         User owner = userService.getAuthenticatedUser();
-
         Project projectToBeSaved = projectMapper.toEntity(request);
+
         projectToBeSaved.setOwner(owner);
 
         Project saved = repository.save(projectToBeSaved);
 
+        ProjectResponseDTO projectResponseDTO = getProjectResponseDTO(owner, saved);
+
         log.info("CREATION SUCCESS - User(id: {}, username: {}) created Project(id: {}, name: {}, description: {})",
                 owner.getId(), owner.getUsername(), saved.getId(), saved.getName(), saved.getDescription());
-
-        return saved;
+        return projectResponseDTO;
     }
 
-    public Project findMyProjectById(Long id) {
-        if (id <= 0) throw new BadRequestException("Invalid argument");
+
+    public Project findById(@Positive Long id) {
 
         User owner = userService.getAuthenticatedUser();
         Project project = repository.findById(id).orElseThrow(() -> new BadRequestException("Project not found"));
@@ -61,10 +65,20 @@ public class ProjectService {
         return project;
     }
 
+    public ProjectResponseDTO findByIdResponseDTO(@Positive Long id) {
+
+        User owner = userService.getAuthenticatedUser();
+        Project project = repository.findById(id).orElseThrow(() -> new BadRequestException("Project not found"));
+
+        verifyUserIsProjectOwner(project, owner);
+
+        return getProjectResponseDTO(owner, project);
+    }
+
     @Transactional
-    public void deleteWithOwnershipCheck(Long id) {
+    public void delete(Long id) {
         if (id <= 0) throw new BadRequestException("Invalid argument");
-        Project project = findMyProjectById(id);
+        Project project = findById(id);
 
         log.info("DELETE SUCCESS - User(id: {}, username: {}) deleted Project(id: {}, name: {})",
                 project.getOwner().getId(), project.getOwner().getUsername(), project.getId(), project.getName());
@@ -72,25 +86,16 @@ public class ProjectService {
         repository.delete(project);
     }
 
-    public Page<Project> findAll(Pageable pageable) {
-        return repository.findAll(pageable);
-    }
-
-    public Project findById(Long id) {
-        return repository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Project not found"));
-    }
-
-    @PreAuthorize("hasRole('ADMIN')")
-    public List<Project> findByOwnerId(Long id) {
-        if (id <= 0) throw new BadRequestException("Invalid argument");
-        User user = userService.findByIdOrElseThrowResourceNotFoundException(id);
-        return repository.findByOwner(user);
-    }
-
     private static void verifyUserIsProjectOwner(Project project, User owner) {
         if (!(project.getOwner().getId().equals(owner.getId()))) {
             throw new ForbiddenException("You're not authorized to execute this function");
         }
+    }
+
+    private @NonNull ProjectResponseDTO getProjectResponseDTO(User owner, Project saved) {
+        UserResponseDTO userResponseDTO = userMapper.toDTO(owner);
+        ProjectResponseDTO projectResponseDTO = projectMapper.toDTO(saved);
+        projectResponseDTO.setUser(userResponseDTO);
+        return projectResponseDTO;
     }
 }
