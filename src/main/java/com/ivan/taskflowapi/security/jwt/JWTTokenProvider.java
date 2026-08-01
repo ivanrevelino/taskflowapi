@@ -45,7 +45,7 @@ public class JWTTokenProvider {
                     .verify(token)
                     .getSubject();
         } catch (JWTVerificationException e) {
-            return "";
+            return null;
         }
     }
 
