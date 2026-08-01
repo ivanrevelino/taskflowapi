@@ -29,6 +29,16 @@ public class TaskService {
     private final UserService userService;
     private final TaskMapper taskMapper;
 
+    public List<TaskResponseDTO> findMyTasks(Long projectId) {
+
+        User owner = userService.getAuthenticatedUser();
+        Project project = projectService.findById(projectId);
+
+        validateProjectOwnership(project, owner);
+
+        return repository.findByProjectId(projectId).stream().map(taskMapper::toDTO).toList();
+    }
+
     @Transactional
     public Task create(@Valid TaskRequestDTO request, Long projectId) {
 
@@ -46,17 +56,22 @@ public class TaskService {
         return saved;
     }
 
-    public List<TaskResponseDTO> findMyTasks(Long projectId) {
-
+    @Transactional
+    public TaskResponseDTO update(Long projectId, Long taskId, TaskRequestDTO request) {
         User owner = userService.getAuthenticatedUser();
         Project project = projectService.findById(projectId);
 
         validateProjectOwnership(project, owner);
 
-        return repository.findByProjectId(projectId).stream().map(taskMapper::toDTO).toList();
+        Task task = findById(taskId);
+        taskMapper.updateFromDTO(request, task);
+
+        Task saved = repository.save(task);
+
+        return new TaskResponseDTO(saved.getId(), saved.getTitle(), saved.getDescription(), saved.getStatus());
     }
 
-    public Task findByIdOrThrowResourceNotFoundException(Long id) {
+    public Task findById(Long id) {
         return repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Task Not Found"));
     }
@@ -68,7 +83,7 @@ public class TaskService {
 
         validateProjectOwnership(project, owner);
 
-        Task task = findByIdOrThrowResourceNotFoundException(taskId);
+        Task task = findById(taskId);
 
         if (!task.getProject().getId().equals(project.getId())) {
             throw new ForbiddenException("You cannot complete this task");
@@ -96,7 +111,7 @@ public class TaskService {
 
         validateProjectOwnership(project, owner);
 
-        Task taskToBeDeleted = findByIdOrThrowResourceNotFoundException(taskId);
+        Task taskToBeDeleted = findById(taskId);
 
         if (!taskToBeDeleted.getProject().getId().equals(project.getId())) {
             throw new BadRequestException("Task does not belong to this project");

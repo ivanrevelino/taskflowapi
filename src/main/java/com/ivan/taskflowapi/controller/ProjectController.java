@@ -31,6 +31,12 @@ public class ProjectController {
         return new ResponseEntity<>(project, HttpStatus.CREATED);
     }
 
+    @PutMapping("/{id}")
+    public ResponseEntity<ProjectResponseDTO> update(@PathVariable Long id, @RequestBody ProjectRequestDTO request) {
+        ProjectResponseDTO project = projectService.update(id, request);
+        return ResponseEntity.ok(project);
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<ProjectResponseDTO> findById(@PathVariable @Valid Long id) {
         ProjectResponseDTO project = projectService.findByIdResponseDTO(id);

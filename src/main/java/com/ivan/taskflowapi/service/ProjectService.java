@@ -86,6 +86,15 @@ public class ProjectService {
         repository.delete(project);
     }
 
+    @Transactional
+    public ProjectResponseDTO update(Long id, ProjectRequestDTO request) {
+        Project project = findById(id);
+        projectMapper.updateFromDto(request, project);
+
+        Project saved = repository.save(project);
+        return getProjectResponseDTO(saved.getOwner(), saved);
+    }
+
     private static void verifyUserIsProjectOwner(Project project, User owner) {
         if (!(project.getOwner().getId().equals(owner.getId()))) {
             throw new ForbiddenException("You're not authorized to execute this function");

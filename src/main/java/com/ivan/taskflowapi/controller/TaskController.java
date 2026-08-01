@@ -31,8 +31,8 @@ public class TaskController {
 
     @PostMapping
     @Operation(summary = "Create new task", description = "Creates a task for a project owned by authenticated user")
-    public ResponseEntity<Task> create(@PathVariable Long projectId, @RequestBody TaskRequestDTO dto) {
-        Task task = taskService.create(dto, projectId);
+    public ResponseEntity<Task> create(@PathVariable Long projectId, @RequestBody TaskRequestDTO request) {
+        Task task = taskService.create(request, projectId);
         return new ResponseEntity<>(task, HttpStatus.CREATED);
     }
 
@@ -48,6 +48,12 @@ public class TaskController {
     public ResponseEntity<List<Task>> groupByStatus(@RequestParam(value = "status") TaskStatus status, @PathVariable Long projectId) {
         List<Task> tasks = taskService.groupByStatus(status, projectId);
         return ResponseEntity.ok(tasks);
+    }
+
+    @PutMapping("/{taskId}")
+    public ResponseEntity<TaskResponseDTO> update(@PathVariable Long projectId, @PathVariable Long taskId, @RequestBody TaskRequestDTO request) {
+        TaskResponseDTO task = taskService.update(projectId, taskId, request);
+        return ResponseEntity.ok(task);
     }
 
     @DeleteMapping("/{taskId}")
