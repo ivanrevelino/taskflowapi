@@ -50,6 +50,9 @@ public class User implements UserDetails {
     @Column(updatable = false, nullable = false)
     private LocalDateTime createdAt;
 
+    @OneToMany(mappedBy = "user")
+    private List<ProjectMember> memberships;
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         if (role == UserRoles.ADMIN) {

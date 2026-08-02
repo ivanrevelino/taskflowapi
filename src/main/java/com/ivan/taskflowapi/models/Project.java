@@ -35,6 +35,9 @@ public class Project {
     @OneToMany(mappedBy = "project")
     private List<Task> tasks = new ArrayList<>();
 
+    @OneToMany(mappedBy = "project")
+    private List<ProjectMember> members = new ArrayList<>();
+
     @CreationTimestamp
     private LocalDateTime createdAt;
 }
