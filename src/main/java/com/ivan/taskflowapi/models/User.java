@@ -51,6 +51,7 @@ public class User implements UserDetails {
     private LocalDateTime createdAt;
 
     @OneToMany(mappedBy = "user")
+    @JsonIgnore
     private List<ProjectMember> memberships;
 
     @Override

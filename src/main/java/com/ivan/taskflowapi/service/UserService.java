@@ -4,6 +4,7 @@ import com.ivan.taskflowapi.dto.user.UpdatePasswordDTO;
 import com.ivan.taskflowapi.dto.user.UserRequestDTO;
 import com.ivan.taskflowapi.dto.user.UserResponseDTO;
 import com.ivan.taskflowapi.exception.BadRequestException;
+import com.ivan.taskflowapi.exception.ForbiddenException;
 import com.ivan.taskflowapi.exception.ResourceNotFoundException;
 import com.ivan.taskflowapi.mapper.UserMapper;
 import com.ivan.taskflowapi.models.User;
@@ -43,6 +44,11 @@ public class UserService {
 
         user.setPassword(passwordEncoder.encode(request.newPassword()));
         repository.save(user);
+    }
+
+    public User findById(Long id) {
+        return repository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
     }
 
     public User getAuthenticatedUser() {

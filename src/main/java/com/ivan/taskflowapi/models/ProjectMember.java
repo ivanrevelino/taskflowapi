@@ -1,5 +1,6 @@
 package com.ivan.taskflowapi.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.ivan.taskflowapi.models.enums.ProjectMemberRole;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -24,11 +25,15 @@ public class ProjectMember {
 
     @ManyToOne
     @JoinColumn(name = "project_id")
+    @JsonIgnore
     private Project project;
 
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
+
+    @ManyToOne
+    private User invitedBy;
 
     @CreationTimestamp
     @Column(updatable = false)

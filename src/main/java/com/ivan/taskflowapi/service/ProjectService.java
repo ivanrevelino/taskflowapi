@@ -29,13 +29,15 @@ import java.util.List;
 public class ProjectService {
 
     private final ProjectRepository repository;
+    private final ProjectMemberService projectMemberService;
     private final UserService userService;
     private final ProjectMapper projectMapper;
     private final UserMapper userMapper;
 
-    public List<ProjectResponseDTO> findMyProjects() {
+    public List<Project> findMyProjects() {
         User user = userService.getAuthenticatedUser();
-        return repository.findByOwner(user).stream().map(projectMapper::toDTO).toList();
+        return repository.findByOwner(user);
+//        return repository.findByOwner(user).stream().map(projectMapper::toDTO).toList();
     }
 
     @Transactional
@@ -46,6 +48,8 @@ public class ProjectService {
         projectToBeSaved.setOwner(owner);
 
         Project saved = repository.save(projectToBeSaved);
+
+        projectMemberService.addOwner(saved, owner);
 
         ProjectResponseDTO projectResponseDTO = getProjectResponseDTO(owner, saved);
 
