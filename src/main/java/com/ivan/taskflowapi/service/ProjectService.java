@@ -7,6 +7,7 @@ import com.ivan.taskflowapi.exception.BadRequestException;
 import com.ivan.taskflowapi.exception.ForbiddenException;
 import com.ivan.taskflowapi.mapper.ProjectMapper;
 import com.ivan.taskflowapi.mapper.UserMapper;
+import com.ivan.taskflowapi.mapper.manual_mapper.ProjectMapperMnl;
 import com.ivan.taskflowapi.models.Project;
 import com.ivan.taskflowapi.models.User;
 import com.ivan.taskflowapi.repository.ProjectRepository;
@@ -16,9 +17,6 @@ import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.NonNull;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -34,10 +32,12 @@ public class ProjectService {
     private final ProjectMapper projectMapper;
     private final UserMapper userMapper;
 
-    public List<Project> findMyProjects() {
+    private final ProjectMapperMnl projectMapperMnl;
+
+    public List<ProjectResponseDTO> findMyProjects() {
         User user = userService.getAuthenticatedUser();
-        return repository.findByOwner(user);
-//        return repository.findByOwner(user).stream().map(projectMapper::toDTO).toList();
+        List<Project> projects = repository.findByOwner(user);
+        return projectMapperMnl.toResponseList(projects);
     }
 
     @Transactional

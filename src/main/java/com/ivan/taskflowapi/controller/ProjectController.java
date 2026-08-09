@@ -20,8 +20,8 @@ public class ProjectController {
     private final ProjectService projectService;
 
     @GetMapping
-    public ResponseEntity<List<Project>> findMyProjects() {
-        List<Project> projects = projectService.findMyProjects();
+    public ResponseEntity<List<ProjectResponseDTO>> findMyProjects() {
+        List<ProjectResponseDTO> projects = projectService.findMyProjects();
         return new ResponseEntity<>(projects, HttpStatus.OK);
     }
 

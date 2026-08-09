@@ -1,6 +1,7 @@
 package com.ivan.taskflowapi.controller;
 
 import com.ivan.taskflowapi.dto.project_member.AddMemberRequestDTO;
+import com.ivan.taskflowapi.dto.project_member.ProjectMemberResponseDTO;
 import com.ivan.taskflowapi.models.ProjectMember;
 import com.ivan.taskflowapi.service.ProjectMemberService;
 import lombok.RequiredArgsConstructor;
@@ -18,8 +19,8 @@ public class ProjectMemberController {
     private final ProjectMemberService projectMemberService;
 
     @PostMapping
-    public ResponseEntity<ProjectMember> addMember(@PathVariable Long projectId, @RequestBody AddMemberRequestDTO request) {
-        ProjectMember projectMember = projectMemberService.addMember(projectId, request);
+    public ResponseEntity<ProjectMemberResponseDTO> addMember(@PathVariable Long projectId, @RequestBody AddMemberRequestDTO request) {
+        ProjectMemberResponseDTO projectMember = projectMemberService.addMember(projectId, request);
         return new ResponseEntity<>(projectMember, HttpStatus.CREATED);
     }
 

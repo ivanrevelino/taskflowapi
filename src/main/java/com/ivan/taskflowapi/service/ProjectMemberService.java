@@ -1,9 +1,11 @@
 package com.ivan.taskflowapi.service;
 
 import com.ivan.taskflowapi.dto.project_member.AddMemberRequestDTO;
+import com.ivan.taskflowapi.dto.project_member.ProjectMemberResponseDTO;
 import com.ivan.taskflowapi.exception.BadRequestException;
 import com.ivan.taskflowapi.exception.ForbiddenException;
 import com.ivan.taskflowapi.exception.ResourceNotFoundException;
+import com.ivan.taskflowapi.mapper.manual_mapper.ProjectMemberMapper;
 import com.ivan.taskflowapi.models.Project;
 import com.ivan.taskflowapi.models.ProjectMember;
 import com.ivan.taskflowapi.models.User;
@@ -21,6 +23,7 @@ public class ProjectMemberService {
 
     private final ProjectMemberRepository repository;
     private final ProjectRepository projectRepository;
+    private final ProjectMemberMapper projectMemberMapper;
     private final UserService userService;
 
     public Page<ProjectMember> listAll(Pageable pageable) {
@@ -36,7 +39,7 @@ public class ProjectMemberService {
         repository.save(projectMember);
     }
 
-    public ProjectMember addMember(Long projectId, AddMemberRequestDTO request) {
+    public ProjectMemberResponseDTO addMember(Long projectId, AddMemberRequestDTO request) {
         User owner = userService.getAuthenticatedUser();
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new ResourceNotFoundException("Project not found"));
@@ -59,7 +62,8 @@ public class ProjectMemberService {
                 .project(project)
                 .invitedBy(owner)
                 .build();
-        return repository.save(projectMember);
+        ProjectMember saved = repository.save(projectMember);
+        return projectMemberMapper.toDTO(projectMember);
     }
 
     private static void validateProjectOwnerShip(Project project, User owner) {
