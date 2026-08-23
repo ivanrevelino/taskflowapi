@@ -25,8 +25,14 @@ public class ProjectMemberController {
     }
 
     @GetMapping
-    public Page<ProjectMember> findAllMembers(Pageable pageable) {
+    public Page<ProjectMemberResponseDTO> findAllMembers(Pageable pageable) {
         return projectMemberService.listAll(pageable);
+    }
+
+    @DeleteMapping("/{memberId}")
+    public ResponseEntity<Void> delete(@PathVariable Long projectId, @PathVariable Long memberId) {
+        projectMemberService.delete(projectId, memberId);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
 }

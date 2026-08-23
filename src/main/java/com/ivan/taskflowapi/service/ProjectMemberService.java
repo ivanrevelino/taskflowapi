@@ -13,12 +13,16 @@ import com.ivan.taskflowapi.models.enums.ProjectMemberRole;
 import com.ivan.taskflowapi.repository.ProjectMemberRepository;
 import com.ivan.taskflowapi.repository.ProjectRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ProjectMemberService {
 
     private final ProjectMemberRepository repository;
@@ -26,8 +30,8 @@ public class ProjectMemberService {
     private final ProjectMemberMapper projectMemberMapper;
     private final UserService userService;
 
-    public Page<ProjectMember> listAll(Pageable pageable) {
-        return repository.findAll(pageable);
+    public Page<ProjectMemberResponseDTO> listAll(Pageable pageable) {
+        return repository.findAll(pageable).map(projectMemberMapper::toDTO);
     }
 
     public void addOwner(Project project, User authenticatedUser) {
@@ -64,6 +68,20 @@ public class ProjectMemberService {
                 .build();
         ProjectMember saved = repository.save(projectMember);
         return projectMemberMapper.toDTO(projectMember);
+    }
+
+    public void delete(Long projectId, Long memberId) {
+        User owner = userService.getAuthenticatedUser();
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new ResourceNotFoundException("Project not found"));
+
+        validateProjectOwnerShip(project, owner);
+
+        ProjectMember member = repository.findByIdAndProjectId(projectId, memberId)
+                .orElseThrow(() -> new ResourceNotFoundException("Member not found"));
+
+        repository.delete(member);
+
     }
 
     private static void validateProjectOwnerShip(Project project, User owner) {
