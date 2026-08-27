@@ -34,11 +34,19 @@ public class ProjectMemberService {
         return repository.findAll(pageable).map(projectMemberMapper::toDTO);
     }
 
+    public List<ProjectMemberResponseDTO> findAll(Long projectId) {
+        User user = userService.getAuthenticatedUser();
+
+        repository.findByProjectIdAndUser(projectId, user).orElseThrow(() -> new ResourceNotFoundException("Sla oqq"));
+
+        return repository.findByProjectId(projectId).stream().map(projectMemberMapper::toDTO).toList();
+    }
+
     public void addOwner(Project project, User authenticatedUser) {
         ProjectMember projectMember = ProjectMember.builder()
                 .project(project)
                 .user(authenticatedUser)
-                .role(ProjectMemberRole.ADMIN)
+                .role(ProjectMemberRole.OWNER)
                 .build();
         repository.save(projectMember);
     }
@@ -67,7 +75,7 @@ public class ProjectMemberService {
                 .invitedBy(owner)
                 .build();
         ProjectMember saved = repository.save(projectMember);
-        return projectMemberMapper.toDTO(projectMember);
+        return projectMemberMapper.toDTO(saved);
     }
 
     public void delete(Long projectId, Long memberId) {

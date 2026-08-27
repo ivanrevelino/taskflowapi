@@ -46,7 +46,7 @@ public class TaskController {
     @GetMapping("/filter")
     @Operation(summary = "Group by status")
     public ResponseEntity<List<Task>> groupByStatus(@RequestParam(value = "status") TaskStatus status, @PathVariable Long projectId) {
-        List<Task> tasks = taskService.groupByStatus(status, projectId);
+        List<Task> tasks = taskService.findByStatus(status, projectId);
         return ResponseEntity.ok(tasks);
     }
 

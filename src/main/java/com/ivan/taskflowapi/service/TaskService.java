@@ -7,9 +7,12 @@ import com.ivan.taskflowapi.exception.ResourceNotFoundException;
 import com.ivan.taskflowapi.exception.ForbiddenException;
 import com.ivan.taskflowapi.mapper.TaskMapper;
 import com.ivan.taskflowapi.models.Project;
+import com.ivan.taskflowapi.models.ProjectMember;
 import com.ivan.taskflowapi.models.Task;
 import com.ivan.taskflowapi.models.User;
+import com.ivan.taskflowapi.models.enums.ProjectMemberRole;
 import com.ivan.taskflowapi.models.enums.TaskStatus;
+import com.ivan.taskflowapi.repository.ProjectMemberRepository;
 import com.ivan.taskflowapi.repository.TaskRepository;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
@@ -25,16 +28,18 @@ import java.util.List;
 public class TaskService {
 
     private final TaskRepository repository;
+    private final ProjectMemberRepository projectMemberRepository;
+    private final TaskMapper taskMapper;
     private final ProjectService projectService;
     private final UserService userService;
-    private final TaskMapper taskMapper;
 
     public List<TaskResponseDTO> findMyTasks(Long projectId) {
 
-        User owner = userService.getAuthenticatedUser();
+        User user = userService.getAuthenticatedUser();
         Project project = projectService.findById(projectId);
 
-        validateProjectOwnership(project, owner);
+        projectMemberRepository.findByProjectIdAndUser(project.getId(), user)
+                .orElseThrow(() -> new ResourceNotFoundException("Resource not found"));
 
         return repository.findByProjectId(projectId).stream().map(taskMapper::toDTO).toList();
     }
@@ -42,31 +47,43 @@ public class TaskService {
     @Transactional
     public Task create(@Valid TaskRequestDTO request, Long projectId) {
 
-        User owner = userService.getAuthenticatedUser();
+        User user = userService.getAuthenticatedUser();
         Project project = projectService.findById(projectId);
 
-        validateProjectOwnership(project, owner);
+        ProjectMember member = projectMemberRepository.findByProjectIdAndUser(projectId, user)
+                .orElseThrow(() -> new ResourceNotFoundException("Member not found"));
+
+        if (!(member.getRole() == ProjectMemberRole.OWNER || member.getRole() == ProjectMemberRole.MEMBER)) {
+            throw new ForbiddenException();
+        }
 
         Task taskToBeSaved = Task.builder().title(request.title()).description(request.description()).project(project).build();
         taskToBeSaved.setStatus(TaskStatus.TO_DO);
         Task saved = repository.save(taskToBeSaved);
 
         log.info("CREATION SUCCESS - User(id: {}, username: {}) created Task(id: {}, title: {}) for Project(id: {}, name: {})",
-                owner.getId(), owner.getUsername(), saved.getId(), saved.getTitle(), project.getId(), project.getName());
+                user.getId(), user.getUsername(), saved.getId(), saved.getTitle(), project.getId(), project.getName());
         return saved;
     }
 
     @Transactional
     public TaskResponseDTO update(Long projectId, Long taskId, TaskRequestDTO request) {
-        User owner = userService.getAuthenticatedUser();
+        User user = userService.getAuthenticatedUser();
         Project project = projectService.findById(projectId);
 
-        validateProjectOwnership(project, owner);
+        ProjectMember member = projectMemberRepository.findByProjectIdAndUser(project.getId(), user)
+                .orElseThrow(() -> new ResourceNotFoundException("Member not found"));
+
+        if (member.getRole() != ProjectMemberRole.ADMIN && member.getRole() != ProjectMemberRole.OWNER) {
+            throw new ForbiddenException();
+        }
 
         Task task = findById(taskId);
         taskMapper.updateFromDTO(request, task);
 
         Task saved = repository.save(task);
+        log.info("UPDATE SUCCESS - User(id: {}, username: {}) updated Task(id: {}, title: {}) for Project(id: {}, name: {})",
+                user.getId(), user.getUsername(), saved.getId(), saved.getTitle(), project.getId(), project.getName());
 
         return new TaskResponseDTO(saved.getId(), saved.getTitle(), saved.getDescription(), saved.getStatus());
     }
@@ -78,10 +95,11 @@ public class TaskService {
 
     @Transactional
     public TaskResponseDTO completeTask(Long projectId, Long taskId) {
-        User owner = userService.getAuthenticatedUser();
+        User user = userService.getAuthenticatedUser();
         Project project = projectService.findById(projectId);
 
-        validateProjectOwnership(project, owner);
+        projectMemberRepository.findByProjectIdAndUser(projectId, user)
+                .orElseThrow(() -> new ResourceNotFoundException("Member not found"));
 
         Task task = findById(taskId);
 
@@ -94,22 +112,26 @@ public class TaskService {
         return new TaskResponseDTO(saved.getId(), saved.getTitle(), saved.getDescription(), saved.getStatus());
     }
 
-    public List<Task> groupByStatus(TaskStatus status, Long projectId) {
+    public List<Task> findByStatus(TaskStatus status, Long projectId) {
 
         Project project = projectService.findById(projectId);
-        User owner = userService.getAuthenticatedUser();
+        User user = userService.getAuthenticatedUser();
 
-        validateProjectOwnership(project, owner);
-
+        projectMemberRepository.findByProjectIdAndUser(project.getId(), user)
+                .orElseThrow(() -> new ResourceNotFoundException("Member not found"));
         return repository.findByProjectIdAndStatus(projectId, status);
     }
 
     public void delete(Long taskId, Long projectId) {
-
-        User owner = userService.getAuthenticatedUser();
+        User user = userService.getAuthenticatedUser();
         Project project = projectService.findById(projectId);
 
-        validateProjectOwnership(project, owner);
+        ProjectMember member = projectMemberRepository.findByProjectIdAndUser(project.getId(), user)
+                .orElseThrow(() -> new ResourceNotFoundException("Member not found"));
+
+        if (member.getRole() == ProjectMemberRole.MEMBER) {
+            throw new ForbiddenException();
+        }
 
         Task taskToBeDeleted = findById(taskId);
 
@@ -120,9 +142,9 @@ public class TaskService {
         repository.delete(taskToBeDeleted);
     }
 
-    private static void validateProjectOwnership(Project project, User owner) {
-        if (!project.getOwner().getId().equals(owner.getId())) {
-            throw new ForbiddenException("\"You don't own this project\"");
-        }
-    }
+//    private static void validateProjectMembership(Project project, User user) {
+//        if (!project.getOwner().getId().equals(user.getId())) {
+//            throw new ForbiddenException("\"You don't own this project\"");
+//        }
+//    }
 }

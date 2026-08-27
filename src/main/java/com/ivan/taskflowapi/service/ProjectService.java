@@ -10,6 +10,7 @@ import com.ivan.taskflowapi.mapper.UserMapper;
 import com.ivan.taskflowapi.mapper.manual_mapper.ProjectMapperMnl;
 import com.ivan.taskflowapi.models.Project;
 import com.ivan.taskflowapi.models.User;
+import com.ivan.taskflowapi.repository.ProjectMemberRepository;
 import com.ivan.taskflowapi.repository.ProjectRepository;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
@@ -31,6 +32,7 @@ public class ProjectService {
     private final UserService userService;
     private final ProjectMapper projectMapper;
     private final UserMapper userMapper;
+    private final ProjectMemberRepository projectMemberRepository;
 
     private final ProjectMapperMnl projectMapperMnl;
 
@@ -63,8 +65,9 @@ public class ProjectService {
 
         User owner = userService.getAuthenticatedUser();
         Project project = repository.findById(id).orElseThrow(() -> new BadRequestException("Project not found"));
+        projectMemberRepository.findByProjectIdAndUser(project.getId(), owner);
 
-        verifyUserIsProjectOwner(project, owner);
+//        verifyUserIsProjectOwner(project, owner);
 
         return project;
     }
