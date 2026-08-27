@@ -7,6 +7,8 @@ import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Data
 @Table(name = "tasks_tb")
@@ -35,6 +37,11 @@ public class Task {
     @JoinColumn(name = "project_id")
     @JsonIgnore
     private Project project;
+
+    @OneToMany(mappedBy = "task", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
+    @Builder.Default
+    private List<TaskComment> comments = new ArrayList<>();
 
     @CreationTimestamp
     private LocalDateTime createdAt;
