@@ -63,6 +63,10 @@ public class UserService {
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
     }
 
+    public Page<UserResponseDTO> searchUsers(String username, Pageable pageable) {
+        return repository.findByUsernameContainingIgnoreCase(username, pageable).map(userMapper::toDTO);
+    }
+
     public User getAuthenticatedUser() {
         return (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     }
