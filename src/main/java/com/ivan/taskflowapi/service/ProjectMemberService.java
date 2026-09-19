@@ -37,9 +37,13 @@ public class ProjectMemberService {
     public List<ProjectMemberResponseDTO> findAll(Long projectId) {
         User user = userService.getAuthenticatedUser();
 
-        repository.findByProjectIdAndUser(projectId, user).orElseThrow(() -> new ResourceNotFoundException("Sla oqq"));
+        repository.findByProjectIdAndUser(projectId, user)
+                .orElseThrow(() -> new ResourceNotFoundException("You are not a member of this project"));
 
-        return repository.findByProjectId(projectId).stream().map(projectMemberMapper::toDTO).toList();
+        return repository.findByProjectId(projectId)
+                .stream()
+                .map(projectMemberMapper::toDTO)
+                .toList();
     }
 
     public void addOwner(Project project, User authenticatedUser) {

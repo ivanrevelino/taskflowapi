@@ -17,7 +17,7 @@ public class CorsConfig {
         CorsConfiguration config = new CorsConfiguration();
 
         config.setAllowedOrigins(
-                List.of("http://localhost:5173")
+                List.of("*")
         );
 
         config.setAllowedMethods(
@@ -28,7 +28,7 @@ public class CorsConfig {
                 List.of("*")
         );
 
-        config.setAllowCredentials(true);
+        config.setAllowCredentials(false);
 
         UrlBasedCorsConfigurationSource source =
                 new UrlBasedCorsConfigurationSource();

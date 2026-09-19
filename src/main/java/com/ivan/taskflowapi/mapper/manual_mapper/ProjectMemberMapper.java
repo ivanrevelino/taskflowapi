@@ -18,15 +18,20 @@ public class ProjectMemberMapper {
     private final UserMapper userMapper;
 
     public ProjectMemberResponseDTO toDTO(ProjectMember projectMember) {
-
-        if (projectMember == null) throw new RuntimeException("Error while mapping ProjectMember");
-        log.warn("Error while mapping ProjectMember");
+        if (projectMember == null){
+            log.warn("Error while mapping ProjectMember");
+            throw new RuntimeException("Error while mapping ProjectMember");
+        }
 
         ProjectMemberResponseDTO responseDTO = new ProjectMemberResponseDTO();
 
         responseDTO.setId(projectMember.getId());
         responseDTO.setUser(userMapper.toDTO(projectMember.getUser()));
-        responseDTO.setInvitedBy(userMapper.toDTO(projectMember.getInvitedBy()));
+
+        if (projectMember.getInvitedBy() != null) {
+            responseDTO.setInvitedBy(userMapper.toDTO(projectMember.getInvitedBy()));
+        }
+
         responseDTO.setJoinedAt(projectMember.getJoinedAt());
         responseDTO.setRole(projectMember.getRole());
 
