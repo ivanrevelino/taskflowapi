@@ -82,6 +82,19 @@ public class ProjectMemberService {
         return projectMemberMapper.toDTO(saved);
     }
 
+    public void leaveProject(Long projectId) {
+        User user = userService.getAuthenticatedUser();
+        Project project = projectRepository.findById(projectId).orElseThrow(() -> new ResourceNotFoundException("Project not found"));
+
+        ProjectMember member = repository.findByProjectIdAndUser(project.getId(), user)
+                .orElseThrow(() -> new ResourceNotFoundException("You are not a member of this project"));
+
+        if (member.getRole() == ProjectMemberRole.OWNER)
+            throw new BadRequestException("You cannot leave your own project");
+
+        repository.delete(member);
+    }
+
     public void delete(Long projectId, Long memberId) {
         User owner = userService.getAuthenticatedUser();
         Project project = projectRepository.findById(projectId)

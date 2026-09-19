@@ -1,6 +1,7 @@
 package com.ivan.taskflowapi.controller;
 
 import com.ivan.taskflowapi.dto.user.UpdatePasswordDTO;
+import com.ivan.taskflowapi.dto.user.UpdateUsernameDTO;
 import com.ivan.taskflowapi.dto.user.UserResponseDTO;
 import com.ivan.taskflowapi.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -26,4 +27,9 @@ public class UserController {
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
+    @PatchMapping("/update/username")
+    public ResponseEntity<Void> updateUsername(@RequestBody UpdateUsernameDTO request) {
+        userService.updateUsername(request);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
 }

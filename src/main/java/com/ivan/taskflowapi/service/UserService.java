@@ -1,6 +1,7 @@
 package com.ivan.taskflowapi.service;
 
 import com.ivan.taskflowapi.dto.user.UpdatePasswordDTO;
+import com.ivan.taskflowapi.dto.user.UpdateUsernameDTO;
 import com.ivan.taskflowapi.dto.user.UserRequestDTO;
 import com.ivan.taskflowapi.dto.user.UserResponseDTO;
 import com.ivan.taskflowapi.exception.BadRequestException;
@@ -43,6 +44,17 @@ public class UserService {
         }
 
         user.setPassword(passwordEncoder.encode(request.newPassword()));
+        repository.save(user);
+    }
+
+    public void updateUsername(UpdateUsernameDTO request) {
+        User user = getAuthenticatedUser();
+
+        if (repository.findByUsername(request.username()) != null) {
+            throw new BadRequestException("Username is already in use");
+        }
+
+        user.setUsername(request.username());
         repository.save(user);
     }
 

@@ -48,5 +48,4 @@ public class ProjectController {
         projectService.delete(id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
-    
 }

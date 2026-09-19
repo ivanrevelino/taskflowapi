@@ -40,4 +40,9 @@ public class ProjectMemberController {
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
+    @DeleteMapping("/leave")
+    public ResponseEntity<Void> leaveProject(@PathVariable Long projectId) {
+        projectMemberService.leaveProject(projectId);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
 }
