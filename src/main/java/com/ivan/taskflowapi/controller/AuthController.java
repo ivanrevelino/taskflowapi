@@ -1,8 +1,6 @@
 package com.ivan.taskflowapi.controller;
 
-import com.ivan.taskflowapi.dto.auth.AuthLoginDTO;
-import com.ivan.taskflowapi.dto.auth.AuthRegisterDTO;
-import com.ivan.taskflowapi.dto.auth.LoginResponse;
+import com.ivan.taskflowapi.dto.auth.*;
 import com.ivan.taskflowapi.dto.user.UserResponseDTO;
 import com.ivan.taskflowapi.service.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -29,9 +27,9 @@ public class AuthController {
             @ApiResponse(responseCode = "200", description = "When successful")
     })
     @Operation(summary = "Login", description = "Make's login and return a token JWT")
-    public ResponseEntity<LoginResponse> login(@RequestBody @Valid AuthLoginDTO dto) {
+    public ResponseEntity<AuthResponse> login(@RequestBody @Valid AuthLoginDTO dto) {
 
-        LoginResponse loginResponse = authService.login(dto);
+        AuthResponse loginResponse = authService.login(dto);
         return ResponseEntity.ok(loginResponse);
     }
 
@@ -44,5 +42,11 @@ public class AuthController {
     public ResponseEntity<UserResponseDTO> register(@RequestBody @Valid AuthRegisterDTO dto){
         UserResponseDTO response = authService.register(dto);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
+    }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<AuthResponse> refresh(RefreshTokenRequest request) {
+        AuthResponse response = authService.refresh(request);
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 }

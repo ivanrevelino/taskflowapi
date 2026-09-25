@@ -1,10 +1,9 @@
 package com.ivan.taskflowapi.service;
 
-import com.ivan.taskflowapi.dto.auth.AuthLoginDTO;
-import com.ivan.taskflowapi.dto.auth.AuthRegisterDTO;
-import com.ivan.taskflowapi.dto.auth.LoginResponse;
+import com.ivan.taskflowapi.dto.auth.*;
 import com.ivan.taskflowapi.dto.user.UserResponseDTO;
 import com.ivan.taskflowapi.exception.BadRequestException;
+import com.ivan.taskflowapi.models.RefreshToken;
 import com.ivan.taskflowapi.models.User;
 import com.ivan.taskflowapi.models.enums.UserRoles;
 import com.ivan.taskflowapi.repository.UserRepository;
@@ -27,16 +26,22 @@ public class AuthService {
     private final BCryptPasswordEncoder passwordEncoder;
     private final JWTTokenProvider tokenProvider;
 
-    public LoginResponse login(AuthLoginDTO dto) {
+    private final RefreshTokenService refreshTokenService;
+
+    public AuthResponse login(AuthLoginDTO dto) {
 
         var usernamePassword = new UsernamePasswordAuthenticationToken(dto.username(), dto.password());
         Authentication authenticated = authenticationManager.authenticate(usernamePassword);
 
         User user = (User) authenticated.getPrincipal();
+
         assert user != null;
-        String token = tokenProvider.generate(user);
+
+        RefreshToken refreshToken = refreshTokenService.create(user);
+        String accessToken = tokenProvider.generate(user);
+
         log.info("LOGIN SUCCESS - userId: {} | username: {} | role: {}", user.getId(), user.getUsername(), user.getRole());
-        return new LoginResponse(token);
+        return new AuthResponse(accessToken, refreshToken.getToken());
     }
 
     public UserResponseDTO register(AuthRegisterDTO dto) {
@@ -56,5 +61,13 @@ public class AuthService {
         User saved = userRepository.save(user);
         log.info("REGISTRATION SUCCESS - userId: {} | username: {} | role: {}", saved.getId(), saved.getUsername(), saved.getRole());
         return UserResponseDTO.builder().name(saved.getName()).username(saved.getUsername()).build();
+    }
+
+    public AuthResponse refresh(RefreshTokenRequest request) {
+
+        RefreshToken refreshToken = refreshTokenService.verify(request.token());
+        String accessToken = tokenProvider.generate(refreshToken.getUser());
+
+        return new AuthResponse(accessToken, refreshToken.getToken());
     }
 }
