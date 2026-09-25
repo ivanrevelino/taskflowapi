@@ -60,7 +60,12 @@ public class AuthService {
                 .role(UserRoles.USER).build();
         User saved = userRepository.save(user);
         log.info("REGISTRATION SUCCESS - userId: {} | username: {} | role: {}", saved.getId(), saved.getUsername(), saved.getRole());
-        return UserResponseDTO.builder().name(saved.getName()).username(saved.getUsername()).build();
+        return UserResponseDTO.builder()
+                .id(saved.getId())
+                .role(saved.getRole())
+                .name(saved.getName())
+                .username(saved.getUsername())
+                .build();
     }
 
     public AuthResponse refresh(RefreshTokenRequest request) {
