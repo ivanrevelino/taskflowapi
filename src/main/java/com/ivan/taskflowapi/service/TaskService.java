@@ -18,6 +18,8 @@ import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -33,19 +35,18 @@ public class TaskService {
     private final ProjectService projectService;
     private final UserService userService;
 
-    public List<TaskResponseDTO> findMyTasks(Long projectId) {
+    public Page<TaskResponseDTO> findAll(Long projectId, Pageable pageable) {
 
         User user = userService.getAuthenticatedUser();
         Project project = projectService.findById(projectId);
 
-        projectMemberRepository.findByProjectIdAndUser(project.getId(), user)
-                .orElseThrow(() -> new ResourceNotFoundException("Resource not found"));
+        ensureUserIsMember(project, user);
 
-        return repository.findByProjectId(projectId).stream().map(taskMapper::toDTO).toList();
+        return repository.findByProjectId(projectId, pageable).map(taskMapper::toDTO);
     }
 
     @Transactional
-    public Task create(@Valid TaskRequestDTO request, Long projectId) {
+    public TaskResponseDTO create(@Valid TaskRequestDTO request, Long projectId) {
 
         User user = userService.getAuthenticatedUser();
         Project project = projectService.findById(projectId);
@@ -53,17 +54,22 @@ public class TaskService {
         ProjectMember member = projectMemberRepository.findByProjectIdAndUser(projectId, user)
                 .orElseThrow(() -> new ResourceNotFoundException("Member not found"));
 
-        if (!(member.getRole() == ProjectMemberRole.OWNER || member.getRole() == ProjectMemberRole.MEMBER)) {
+        if (!(member.getRole() == ProjectMemberRole.OWNER || member.getRole() == ProjectMemberRole.ADMIN)) {
             throw new ForbiddenException();
         }
 
-        Task taskToBeSaved = Task.builder().title(request.title()).description(request.description()).project(project).build();
-        taskToBeSaved.setStatus(TaskStatus.TO_DO);
+        Task taskToBeSaved = Task.builder()
+                .title(request.title())
+                .description(request.description())
+                .status(TaskStatus.TO_DO)
+                .project(project).build();
+
         Task saved = repository.save(taskToBeSaved);
 
         log.info("CREATION SUCCESS - User(id: {}, username: {}) created Task(id: {}, title: {}) for Project(id: {}, name: {})",
                 user.getId(), user.getUsername(), saved.getId(), saved.getTitle(), project.getId(), project.getName());
-        return saved;
+
+        return taskMapper.toDTO(saved);
     }
 
     @Transactional
@@ -98,14 +104,11 @@ public class TaskService {
         User user = userService.getAuthenticatedUser();
         Project project = projectService.findById(projectId);
 
-        projectMemberRepository.findByProjectIdAndUser(projectId, user)
-                .orElseThrow(() -> new ResourceNotFoundException("Member not found"));
+        ensureUserIsMember(project, user);
 
         Task task = findById(taskId);
 
-        if (!task.getProject().getId().equals(project.getId())) {
-            throw new ForbiddenException("You cannot complete this task");
-        }
+        ensureTaskBelongsToProject(task, project);
 
         task.setStatus(TaskStatus.COMPLETED);
         Task saved = repository.save(task);
@@ -113,12 +116,11 @@ public class TaskService {
     }
 
     public List<Task> findByStatus(TaskStatus status, Long projectId) {
-
         Project project = projectService.findById(projectId);
         User user = userService.getAuthenticatedUser();
 
-        projectMemberRepository.findByProjectIdAndUser(project.getId(), user)
-                .orElseThrow(() -> new ResourceNotFoundException("Member not found"));
+        ensureUserIsMember(project, user);
+
         return repository.findByProjectIdAndStatus(projectId, status);
     }
 
@@ -129,22 +131,26 @@ public class TaskService {
         ProjectMember member = projectMemberRepository.findByProjectIdAndUser(project.getId(), user)
                 .orElseThrow(() -> new ResourceNotFoundException("Member not found"));
 
-        if (member.getRole() == ProjectMemberRole.MEMBER) {
+        if (member.getRole() == ProjectMemberRole.MEMBER || member.getRole() == ProjectMemberRole.ADMIN) {
             throw new ForbiddenException();
         }
 
         Task taskToBeDeleted = findById(taskId);
 
-        if (!taskToBeDeleted.getProject().getId().equals(project.getId())) {
-            throw new BadRequestException("Task does not belong to this project");
-        }
+        ensureTaskBelongsToProject(taskToBeDeleted, project);
 
         repository.delete(taskToBeDeleted);
     }
 
-//    private static void validateProjectMembership(Project project, User user) {
-//        if (!project.getOwner().getId().equals(user.getId())) {
-//            throw new ForbiddenException("\"You don't own this project\"");
-//        }
-//    }
+    private static void ensureTaskBelongsToProject(Task task, Project project) {
+        if (!task.getProject().getId().equals(project.getId())) {
+            throw new BadRequestException("Task does not belong to this project");
+        }
+    }
+
+    private void ensureUserIsMember(Project project, User user) {
+        if (!(projectMemberRepository.existsByProjectIdAndUserId(project.getId(), user.getId()))) {
+            throw new ResourceNotFoundException("Member not found");
+        }
+    }
 }

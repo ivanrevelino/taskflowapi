@@ -8,7 +8,10 @@ import com.ivan.taskflowapi.service.TaskService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -24,15 +27,14 @@ public class TaskController {
 
     @GetMapping
     @Operation(summary = "Find all tasks in the project")
-    public ResponseEntity<List<TaskResponseDTO>> findAll(@PathVariable Long projectId) {
-        List<TaskResponseDTO> tasks = taskService.findMyTasks(projectId);
-        return new ResponseEntity<>(tasks, HttpStatus.OK);
+    public Page<TaskResponseDTO> findAll(@PathVariable Long projectId, Pageable pageable) {
+        return taskService.findAll(projectId, pageable);
     }
 
     @PostMapping
     @Operation(summary = "Create new task", description = "Creates a task for a project owned by authenticated user")
-    public ResponseEntity<Task> create(@PathVariable Long projectId, @RequestBody TaskRequestDTO request) {
-        Task task = taskService.create(request, projectId);
+    public ResponseEntity<TaskResponseDTO> create(@PathVariable Long projectId, @RequestBody @Valid TaskRequestDTO request) {
+        TaskResponseDTO task = taskService.create(request, projectId);
         return new ResponseEntity<>(task, HttpStatus.CREATED);
     }
 
@@ -51,7 +53,7 @@ public class TaskController {
     }
 
     @PutMapping("/{taskId}")
-    public ResponseEntity<TaskResponseDTO> update(@PathVariable Long projectId, @PathVariable Long taskId, @RequestBody TaskRequestDTO request) {
+    public ResponseEntity<TaskResponseDTO> update(@PathVariable Long projectId, @PathVariable Long taskId, @RequestBody @Valid TaskRequestDTO request) {
         TaskResponseDTO task = taskService.update(projectId, taskId, request);
         return ResponseEntity.ok(task);
     }
@@ -60,7 +62,7 @@ public class TaskController {
     @Operation(summary = "Delete the task in the owned project")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "Successful operation"),
-            @ApiResponse(responseCode = "400", description = "When the anime does not exists in database")
+            @ApiResponse(responseCode = "400", description = "When the Task does not exists in database")
     })
     public ResponseEntity<Void> delete(@PathVariable Long projectId, @PathVariable Long taskId) {
         taskService.delete(taskId, projectId);
