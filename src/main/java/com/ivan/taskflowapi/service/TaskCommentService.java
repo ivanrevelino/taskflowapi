@@ -109,7 +109,7 @@ public class TaskCommentService {
                 .orElseThrow(() -> new ResourceNotFoundException("Task not found"));
 
         if (!task.getProject().getId().equals(project.getId())) {
-            throw new BadRequestException("Task does not belong to this project");
+            throw new ForbiddenException("Task does not belong to this project");
         }
 
         return task;

@@ -23,12 +23,7 @@ public class UserController {
         return ResponseEntity.ok(userService.getAuthenticatedUserDTO());
     }
 
-    @GetMapping("/search")
-    public Page<UserResponseDTO> searchUsers(@RequestParam String username, Pageable pageable) {
-        return userService.searchUsers(username, pageable);
-    }
-
-    @PutMapping("/me/update/password")
+    @PatchMapping("/me/update/password")
     public ResponseEntity<Void> updatePassword(@RequestBody UpdatePasswordDTO request) {
         userService.updatePassword(request);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -38,5 +33,10 @@ public class UserController {
     public ResponseEntity<Void> updateUsername(@RequestBody UpdateUsernameDTO request) {
         userService.updateUsername(request);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    @GetMapping("/search")
+    public Page<UserResponseDTO> searchUsers(@RequestParam String username, Pageable pageable) {
+        return userService.searchUsers(username, pageable);
     }
 }

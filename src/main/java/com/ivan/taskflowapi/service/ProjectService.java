@@ -5,6 +5,7 @@ import com.ivan.taskflowapi.dto.project.ProjectResponseDTO;
 import com.ivan.taskflowapi.dto.user.UserResponseDTO;
 import com.ivan.taskflowapi.exception.BadRequestException;
 import com.ivan.taskflowapi.exception.ForbiddenException;
+import com.ivan.taskflowapi.exception.ResourceNotFoundException;
 import com.ivan.taskflowapi.mapper.ProjectMapper;
 import com.ivan.taskflowapi.mapper.UserMapper;
 import com.ivan.taskflowapi.mapper.manual_mapper.ProjectMapperMnl;
@@ -18,6 +19,8 @@ import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.NonNull;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -34,12 +37,9 @@ public class ProjectService {
     private final UserMapper userMapper;
     private final ProjectMemberRepository projectMemberRepository;
 
-    private final ProjectMapperMnl projectMapperMnl;
-
-    public List<ProjectResponseDTO> findMyProjects() {
+    public Page<ProjectResponseDTO> findMyProjects(Pageable pageable) {
         User user = userService.getAuthenticatedUser();
-        List<Project> projects = repository.findByOwner(user);
-        return projectMapperMnl.toResponseList(projects);
+        return repository.findByOwner(user, pageable).map(projectMapper::toDTO);
     }
 
     @Transactional
@@ -61,23 +61,22 @@ public class ProjectService {
     }
 
 
-    public Project findById(@Positive Long id) {
+    public Project findById(Long id) {
 
-        User owner = userService.getAuthenticatedUser();
-        Project project = repository.findById(id).orElseThrow(() -> new BadRequestException("Project not found"));
-        projectMemberRepository.findByProjectIdAndUser(project.getId(), owner);
+        User user = userService.getAuthenticatedUser();
+        Project project = repository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Project not found"));
 
-//        verifyUserIsProjectOwner(project, owner);
+        if (!projectMemberRepository.existsByProjectIdAndUserId(project.getId(), user.getId())) {
+            throw new ForbiddenException("You don't make part of this project");
+        }
 
         return project;
     }
 
-    public ProjectResponseDTO findByIdResponseDTO(@Positive Long id) {
+    public ProjectResponseDTO findByIdResponseDTO(Long id) {
 
         User owner = userService.getAuthenticatedUser();
-        Project project = repository.findById(id).orElseThrow(() -> new BadRequestException("Project not found"));
-
-        verifyUserIsProjectOwner(project, owner);
+        Project project = this.findById(id);
 
         return getProjectResponseDTO(owner, project);
     }
@@ -85,7 +84,10 @@ public class ProjectService {
     @Transactional
     public void delete(Long id) {
         if (id <= 0) throw new BadRequestException("Invalid argument");
+        User user = userService.getAuthenticatedUser();
         Project project = findById(id);
+
+        verifyUserIsProjectOwner(project, user);
 
         log.info("DELETE SUCCESS - User(id: {}, username: {}) deleted Project(id: {}, name: {})",
                 project.getOwner().getId(), project.getOwner().getUsername(), project.getId(), project.getName());
@@ -95,7 +97,10 @@ public class ProjectService {
 
     @Transactional
     public ProjectResponseDTO update(Long id, ProjectRequestDTO request) {
+        User user = userService.getAuthenticatedUser();
         Project project = findById(id);
+
+        verifyUserIsProjectOwner(project, user);
         projectMapper.updateFromDto(request, project);
 
         Project saved = repository.save(project);

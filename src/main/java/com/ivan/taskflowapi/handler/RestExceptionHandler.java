@@ -1,18 +1,20 @@
-package com.ivan.taskflowapi.infra.handler;
+package com.ivan.taskflowapi.handler;
 
 import com.ivan.taskflowapi.exception.BadRequestException;
 import com.ivan.taskflowapi.exception.ForbiddenException;
 import com.ivan.taskflowapi.exception.ResourceNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.time.Instant;
+import java.util.HashMap;
+import java.util.Map;
 
-@ControllerAdvice
-public class RestExceptionHandler extends ResponseEntityExceptionHandler {
+@RestControllerAdvice
+public class RestExceptionHandler {
 
     @ExceptionHandler(ResourceNotFoundException.class)
     private ResponseEntity<RestErrorMessage> resourceNotFoundException(ResourceNotFoundException exception) {
@@ -44,6 +46,29 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
                 .status(HttpStatus.BAD_REQUEST.value())
                 .timeStamp(Instant.now())
                 .build();
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(message);
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    private ResponseEntity<RestErrorMessage> methodArgumentNotValid(MethodArgumentNotValidException exception) {
+
+        Map<String, String> errors = new HashMap<>();
+
+        exception.getBindingResult().getFieldErrors().forEach((error -> {
+            String fieldName = error.getField();
+            String errorMessage = error.getDefaultMessage();
+
+            errors.put(fieldName, errorMessage);
+        }));
+
+        RestErrorMessage message = RestErrorMessage.builder()
+                .message(exception.getMessage())
+                .error("Bad Request")
+                .fields(errors)
+                .status(HttpStatus.BAD_REQUEST.value())
+                .timeStamp(Instant.now())
+                .build();
+
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(message);
     }
 }

@@ -115,13 +115,13 @@ public class TaskService {
         return new TaskResponseDTO(saved.getId(), saved.getTitle(), saved.getDescription(), saved.getStatus());
     }
 
-    public List<Task> findByStatus(TaskStatus status, Long projectId) {
+    public Page<TaskResponseDTO> findByStatus(TaskStatus status, Long projectId, Pageable pageable) {
         Project project = projectService.findById(projectId);
         User user = userService.getAuthenticatedUser();
 
         ensureUserIsMember(project, user);
 
-        return repository.findByProjectIdAndStatus(projectId, status);
+        return repository.findByProjectIdAndStatus(projectId, status, pageable).map(taskMapper::toDTO);
     }
 
     public void delete(Long taskId, Long projectId) {
@@ -131,8 +131,8 @@ public class TaskService {
         ProjectMember member = projectMemberRepository.findByProjectIdAndUser(project.getId(), user)
                 .orElseThrow(() -> new ResourceNotFoundException("Member not found"));
 
-        if (member.getRole() == ProjectMemberRole.MEMBER || member.getRole() == ProjectMemberRole.ADMIN) {
-            throw new ForbiddenException();
+        if (member.getRole() != ProjectMemberRole.OWNER && member.getRole() != ProjectMemberRole.ADMIN) {
+            throw new ForbiddenException("You are not authorized to delete tasks in this project");
         }
 
         Task taskToBeDeleted = findById(taskId);
@@ -144,7 +144,7 @@ public class TaskService {
 
     private static void ensureTaskBelongsToProject(Task task, Project project) {
         if (!task.getProject().getId().equals(project.getId())) {
-            throw new BadRequestException("Task does not belong to this project");
+            throw new ForbiddenException("Task does not belong to this project");
         }
     }
 

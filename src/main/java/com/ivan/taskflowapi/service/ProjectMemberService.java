@@ -30,10 +30,6 @@ public class ProjectMemberService {
     private final ProjectMemberMapper projectMemberMapper;
     private final UserService userService;
 
-    public Page<ProjectMemberResponseDTO> listAll(Pageable pageable) {
-        return repository.findAll(pageable).map(projectMemberMapper::toDTO);
-    }
-
     public List<ProjectMemberResponseDTO> findAll(Long projectId) {
         User user = userService.getAuthenticatedUser();
 
@@ -111,7 +107,7 @@ public class ProjectMemberService {
 
     private static void validateProjectOwnerShip(Project project, User owner) {
         if (!project.getOwner().getId().equals(owner.getId())) {
-            throw new ForbiddenException("This is not your project man");
+            throw new ForbiddenException("You are not the owner of this project");
         }
     }
 }

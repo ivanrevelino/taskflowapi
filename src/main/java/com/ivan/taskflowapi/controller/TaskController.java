@@ -47,12 +47,16 @@ public class TaskController {
 
     @GetMapping("/filter")
     @Operation(summary = "Group by status")
-    public ResponseEntity<List<Task>> groupByStatus(@RequestParam(value = "status") TaskStatus status, @PathVariable Long projectId) {
-        List<Task> tasks = taskService.findByStatus(status, projectId);
-        return ResponseEntity.ok(tasks);
+    public Page<TaskResponseDTO> groupByStatus(@RequestParam(value = "status") TaskStatus status, @PathVariable Long projectId, Pageable pageable) {
+        return taskService.findByStatus(status, projectId, pageable);
     }
 
     @PutMapping("/{taskId}")
+    @Operation(summary = "Update")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Task updated successfully"),
+            @ApiResponse(responseCode = "404", description = "Task not found")
+    })
     public ResponseEntity<TaskResponseDTO> update(@PathVariable Long projectId, @PathVariable Long taskId, @RequestBody @Valid TaskRequestDTO request) {
         TaskResponseDTO task = taskService.update(projectId, taskId, request);
         return ResponseEntity.ok(task);
@@ -61,8 +65,8 @@ public class TaskController {
     @DeleteMapping("/{taskId}")
     @Operation(summary = "Delete the task in the owned project")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "204", description = "Successful operation"),
-            @ApiResponse(responseCode = "400", description = "When the Task does not exists in database")
+            @ApiResponse(responseCode = "204", description = "Task deleted successfully"),
+            @ApiResponse(responseCode = "404", description = "Task not found")
     })
     public ResponseEntity<Void> delete(@PathVariable Long projectId, @PathVariable Long taskId) {
         taskService.delete(taskId, projectId);

@@ -24,7 +24,7 @@ public class AuthController {
 
     @PostMapping("/login")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "When successful")
+            @ApiResponse(responseCode = "200", description = "Successful operation")
     })
     @Operation(summary = "Login", description = "Make's login and return a token JWT")
     public ResponseEntity<AuthResponse> login(@RequestBody @Valid AuthLoginDTO dto) {
@@ -35,7 +35,7 @@ public class AuthController {
 
     @PostMapping("/register")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "When successful"),
+            @ApiResponse(responseCode = "201", description = "Successful operation"),
             @ApiResponse(responseCode = "400", description = "When user already exists")
     })
     @Operation(summary = "Register a new User", description = "Register a new user in the system")
@@ -45,6 +45,7 @@ public class AuthController {
     }
 
     @PostMapping("/refresh")
+    @Operation(summary = "Refresh token", description = "Return new access token")
     public ResponseEntity<AuthResponse> refresh(@RequestBody @Valid RefreshTokenRequest request) {
         AuthResponse response = authService.refresh(request);
         return new ResponseEntity<>(response, HttpStatus.OK);
