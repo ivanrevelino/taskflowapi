@@ -18,6 +18,6 @@ public class ProjectResponseDTO {
     private Long id;
     private String name;
     private String description;
-    private UserResponseDTO user;
+    private UserResponseDTO owner;
     private List<ProjectMemberResponseDTO> members;
 }

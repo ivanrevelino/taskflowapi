@@ -2,6 +2,7 @@ package com.ivan.taskflowapi.controller;
 
 import com.ivan.taskflowapi.dto.project.ProjectRequestDTO;
 import com.ivan.taskflowapi.dto.project.ProjectResponseDTO;
+import com.ivan.taskflowapi.dto.project.ProjectSummaryResponse;
 import com.ivan.taskflowapi.models.Project;
 import com.ivan.taskflowapi.service.ProjectService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -25,8 +26,15 @@ public class ProjectController {
 
     private final ProjectService projectService;
 
-    @GetMapping
-    @Operation(summary = "Find my projects", description = "Return all project's of logged user")
+    @GetMapping("/me")
+    @Operation(summary = "List user's project", description = "Returns all projects in which the authenticated user participates, regardless of their role")
+    @ApiResponse(responseCode = "200")
+    public Page<ProjectSummaryResponse> findAll(Pageable pageable) {
+        return projectService.findAllProjects(pageable);
+    }
+
+    @GetMapping("/me/owned")
+    @Operation(summary = "List user's owned project", description = "Returns only the projects owned by the authenticated user.")
     @ApiResponse(responseCode = "200")
     public Page<ProjectResponseDTO> findMyProjects(Pageable pageable) {
         return projectService.findMyProjects(pageable);

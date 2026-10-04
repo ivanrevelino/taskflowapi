@@ -2,9 +2,8 @@ package com.ivan.taskflowapi.service;
 
 import com.ivan.taskflowapi.dto.task.TaskRequestDTO;
 import com.ivan.taskflowapi.dto.task.TaskResponseDTO;
-import com.ivan.taskflowapi.exception.BadRequestException;
-import com.ivan.taskflowapi.exception.ResourceNotFoundException;
 import com.ivan.taskflowapi.exception.ForbiddenException;
+import com.ivan.taskflowapi.exception.ResourceNotFoundException;
 import com.ivan.taskflowapi.mapper.TaskMapper;
 import com.ivan.taskflowapi.models.Project;
 import com.ivan.taskflowapi.models.ProjectMember;
@@ -21,8 +20,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -88,10 +85,11 @@ public class TaskService {
         taskMapper.updateFromDTO(request, task);
 
         Task saved = repository.save(task);
+
         log.info("UPDATE SUCCESS - User(id: {}, username: {}) updated Task(id: {}, title: {}) for Project(id: {}, name: {})",
                 user.getId(), user.getUsername(), saved.getId(), saved.getTitle(), project.getId(), project.getName());
 
-        return new TaskResponseDTO(saved.getId(), saved.getTitle(), saved.getDescription(), saved.getStatus());
+        return taskMapper.toDTO(task);
     }
 
     public Task findById(Long id) {
@@ -112,7 +110,7 @@ public class TaskService {
 
         task.setStatus(TaskStatus.COMPLETED);
         Task saved = repository.save(task);
-        return new TaskResponseDTO(saved.getId(), saved.getTitle(), saved.getDescription(), saved.getStatus());
+        return taskMapper.toDTO(saved);
     }
 
     public Page<TaskResponseDTO> findByStatus(TaskStatus status, Long projectId, Pageable pageable) {

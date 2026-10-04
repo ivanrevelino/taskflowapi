@@ -2,14 +2,17 @@ package com.ivan.taskflowapi.service;
 
 import com.ivan.taskflowapi.dto.project.ProjectRequestDTO;
 import com.ivan.taskflowapi.dto.project.ProjectResponseDTO;
+import com.ivan.taskflowapi.dto.project.ProjectSummaryResponse;
 import com.ivan.taskflowapi.dto.user.UserResponseDTO;
 import com.ivan.taskflowapi.exception.BadRequestException;
 import com.ivan.taskflowapi.exception.ForbiddenException;
 import com.ivan.taskflowapi.exception.ResourceNotFoundException;
 import com.ivan.taskflowapi.mapper.ProjectMapper;
+import com.ivan.taskflowapi.mapper.ProjectMemberMapper;
 import com.ivan.taskflowapi.mapper.UserMapper;
 import com.ivan.taskflowapi.mapper.manual_mapper.ProjectMapperMnl;
 import com.ivan.taskflowapi.models.Project;
+import com.ivan.taskflowapi.models.ProjectMember;
 import com.ivan.taskflowapi.models.User;
 import com.ivan.taskflowapi.repository.ProjectMemberRepository;
 import com.ivan.taskflowapi.repository.ProjectRepository;
@@ -23,6 +26,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -36,10 +40,18 @@ public class ProjectService {
     private final ProjectMapper projectMapper;
     private final UserMapper userMapper;
     private final ProjectMemberRepository projectMemberRepository;
+    private final ProjectMemberMapper projectMemberMapper;
 
     public Page<ProjectResponseDTO> findMyProjects(Pageable pageable) {
         User user = userService.getAuthenticatedUser();
         return repository.findByOwner(user, pageable).map(projectMapper::toDTO);
+    }
+
+    public Page<ProjectSummaryResponse> findAllProjects(Pageable pageable) {
+        User user = userService.getAuthenticatedUser();
+        Page<ProjectMember> page = projectMemberRepository.findByUser(user, pageable);
+
+        return page.map(projectMemberMapper::toDto);
     }
 
     @Transactional
@@ -116,7 +128,7 @@ public class ProjectService {
     private @NonNull ProjectResponseDTO getProjectResponseDTO(User owner, Project saved) {
         UserResponseDTO userResponseDTO = userMapper.toDTO(owner);
         ProjectResponseDTO projectResponseDTO = projectMapper.toDTO(saved);
-        projectResponseDTO.setUser(userResponseDTO);
+        projectResponseDTO.setOwner(userResponseDTO);
         return projectResponseDTO;
     }
 }
