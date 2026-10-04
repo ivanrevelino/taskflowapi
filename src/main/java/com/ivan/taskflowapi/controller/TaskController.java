@@ -39,16 +39,23 @@ public class TaskController {
     }
 
     @PatchMapping("/{taskId}/complete")
-    @Operation(summary = "Complete a task in the owned project")
+    @Operation(summary = "Complete a task in the project")
     public ResponseEntity<Void> completeTask(@PathVariable Long taskId, @PathVariable Long projectId) {
         taskService.completeTask(projectId, taskId);
         return ResponseEntity.noContent().build();
     }
 
     @PatchMapping("/{taskId}/claim")
-    @Operation(summary = "Complete a task in the owned project")
+    @Operation(summary = "Claim a task in the project")
     public ResponseEntity<Void> claim(@PathVariable Long taskId, @PathVariable Long projectId) {
         taskService.claim(projectId, taskId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PatchMapping("/{taskId}/release")
+    @Operation(summary = "Release a task in the project")
+    public ResponseEntity<Void> release(@PathVariable Long taskId, @PathVariable Long projectId) {
+        taskService.release(projectId, taskId);
         return ResponseEntity.noContent().build();
     }
 

@@ -12,7 +12,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "project_members")
+@Table(name = "project_members_tb")
 @Builder
 @Data
 @AllArgsConstructor
@@ -33,6 +33,7 @@ public class ProjectMember {
     private User user;
 
     @ManyToOne
+    @JoinColumn()
     private User invitedBy;
 
     @CreationTimestamp

@@ -43,6 +43,15 @@ public class TaskService {
         return repository.findByProjectId(projectId, pageable).map(taskMapper::toDTO);
     }
 
+    public Page<TaskResponseDTO> findByStatus(TaskStatus status, Long projectId, Pageable pageable) {
+        Project project = projectService.findById(projectId);
+        User user = userService.getAuthenticatedUser();
+
+        ensureUserIsMember(project, user);
+
+        return repository.findByProjectIdAndStatus(projectId, status, pageable).map(taskMapper::toDTO);
+    }
+
     @Transactional
     public TaskResponseDTO create(@Valid TaskRequestDTO request, Long projectId) {
 
@@ -115,34 +124,53 @@ public class TaskService {
 
     }
 
+    @Transactional
+    public void release(Long projectId, Long taskId) {
 
-    public Task findById(Long id) {
-        return repository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Task Not Found"));
+        User user = userService.getAuthenticatedUser();
+        Project project = projectService.findById(projectId);
+        Task task = this.findById(taskId);
+
+        ensureTaskBelongsToProject(task, project);
+
+        if (task.getAssignee() == null) {
+            throw new BadRequestException("This task has no assignee");
+        }
+
+        if (!task.getAssignee().equals(user)) {
+            throw new ForbiddenException("You cannot release this task. Because you're not the claimer");
+        }
+
+        task.setAssignee(null);
+        task.setStatus(TaskStatus.TO_DO);
+
+        repository.save(task);
     }
 
     @Transactional
     public void completeTask(Long projectId, Long taskId) {
         User user = userService.getAuthenticatedUser();
         Project project = projectService.findById(projectId);
-
-        ensureUserIsMember(project, user);
-
         Task task = findById(taskId);
 
         ensureTaskBelongsToProject(task, project);
+        ensureUserIsMember(project, user);
+
+        if (task.getAssignee() == null) {
+            throw new BadRequestException("This task has no assignee");
+        }
+
+        if (!task.getAssignee().equals(user)) {
+            throw new ForbiddenException("You cannot complete this task. Because you're not the claimer");
+        }
 
         task.setStatus(TaskStatus.COMPLETED);
         repository.save(task);
     }
 
-    public Page<TaskResponseDTO> findByStatus(TaskStatus status, Long projectId, Pageable pageable) {
-        Project project = projectService.findById(projectId);
-        User user = userService.getAuthenticatedUser();
-
-        ensureUserIsMember(project, user);
-
-        return repository.findByProjectIdAndStatus(projectId, status, pageable).map(taskMapper::toDTO);
+    public Task findById(Long id) {
+        return repository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Task Not Found"));
     }
 
     public void delete(Long taskId, Long projectId) {
