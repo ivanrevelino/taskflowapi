@@ -38,11 +38,18 @@ public class TaskController {
         return new ResponseEntity<>(task, HttpStatus.CREATED);
     }
 
-    @PatchMapping("/{taskId}")
+    @PatchMapping("/{taskId}/complete")
     @Operation(summary = "Complete a task in the owned project")
-    public ResponseEntity<TaskResponseDTO> completeTask(@PathVariable Long taskId, @PathVariable Long projectId) {
-        TaskResponseDTO response = taskService.completeTask(projectId, taskId);
-        return new ResponseEntity<>(response, HttpStatus.ACCEPTED);
+    public ResponseEntity<Void> completeTask(@PathVariable Long taskId, @PathVariable Long projectId) {
+        taskService.completeTask(projectId, taskId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PatchMapping("/{taskId}/claim")
+    @Operation(summary = "Complete a task in the owned project")
+    public ResponseEntity<Void> claim(@PathVariable Long taskId, @PathVariable Long projectId) {
+        taskService.claim(projectId, taskId);
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/filter")

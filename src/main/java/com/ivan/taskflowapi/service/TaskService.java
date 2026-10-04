@@ -2,6 +2,7 @@ package com.ivan.taskflowapi.service;
 
 import com.ivan.taskflowapi.dto.task.TaskRequestDTO;
 import com.ivan.taskflowapi.dto.task.TaskResponseDTO;
+import com.ivan.taskflowapi.exception.BadRequestException;
 import com.ivan.taskflowapi.exception.ForbiddenException;
 import com.ivan.taskflowapi.exception.ResourceNotFoundException;
 import com.ivan.taskflowapi.mapper.TaskMapper;
@@ -77,9 +78,7 @@ public class TaskService {
         ProjectMember member = projectMemberRepository.findByProjectIdAndUser(project.getId(), user)
                 .orElseThrow(() -> new ResourceNotFoundException("Member not found"));
 
-        if (member.getRole() != ProjectMemberRole.ADMIN && member.getRole() != ProjectMemberRole.OWNER) {
-            throw new ForbiddenException();
-        }
+        validateAdminOrOwner(member);
 
         Task task = findById(taskId);
         taskMapper.updateFromDTO(request, task);
@@ -92,13 +91,38 @@ public class TaskService {
         return taskMapper.toDTO(task);
     }
 
+    @Transactional
+    public void claim(Long projectId, Long taskId) {
+
+        User user = userService.getAuthenticatedUser();
+        Project project = projectService.findById(projectId);
+        Task task = this.findById(taskId);
+
+        ensureTaskBelongsToProject(task, project);
+
+        if (task.getAssignee() != null) {
+            throw new BadRequestException("This task is being assigned");
+        }
+
+        if (task.getStatus() != TaskStatus.TO_DO) {
+            throw new BadRequestException("Only tasks with TO_DO status can be claimed");
+        }
+
+        task.setAssignee(user);
+        task.setStatus(TaskStatus.IN_PROGRESS);
+
+        repository.save(task);
+
+    }
+
+
     public Task findById(Long id) {
         return repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Task Not Found"));
     }
 
     @Transactional
-    public TaskResponseDTO completeTask(Long projectId, Long taskId) {
+    public void completeTask(Long projectId, Long taskId) {
         User user = userService.getAuthenticatedUser();
         Project project = projectService.findById(projectId);
 
@@ -109,8 +133,7 @@ public class TaskService {
         ensureTaskBelongsToProject(task, project);
 
         task.setStatus(TaskStatus.COMPLETED);
-        Task saved = repository.save(task);
-        return taskMapper.toDTO(saved);
+        repository.save(task);
     }
 
     public Page<TaskResponseDTO> findByStatus(TaskStatus status, Long projectId, Pageable pageable) {
@@ -143,6 +166,12 @@ public class TaskService {
     private static void ensureTaskBelongsToProject(Task task, Project project) {
         if (!task.getProject().getId().equals(project.getId())) {
             throw new ForbiddenException("Task does not belong to this project");
+        }
+    }
+
+    private static void validateAdminOrOwner(ProjectMember member) {
+        if (member.getRole() != ProjectMemberRole.ADMIN && member.getRole() != ProjectMemberRole.OWNER) {
+            throw new ForbiddenException();
         }
     }
 

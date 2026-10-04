@@ -178,13 +178,4 @@ class ProjectServiceTest {
                 .isInstanceOf(ResourceNotFoundException.class)
                 .hasMessage("Project not found");
     }
-
-
-    @Test
-    void delete() {
-    }
-
-    @Test
-    void update() {
-    }
 }

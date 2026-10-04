@@ -38,6 +38,10 @@ public class Task {
     @JsonIgnore
     private Project project;
 
+    @ManyToOne
+    @JoinColumn(name = "assignee_id")
+    private User assignee;
+
     @OneToMany(mappedBy = "task", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore
     @Builder.Default
