@@ -34,6 +34,7 @@ public class TaskCommentService {
     private final TaskRepository taskRepository;
     private final ProjectMemberRepository projectMemberRepository;
     private final TaskCommentMapper taskCommentMapper;
+    private final ProjectService projectService;
     private final UserService userService;
 
     @Transactional
@@ -53,6 +54,27 @@ public class TaskCommentService {
 
         log.info("CREATION SUCCESS - User(id: {}, username: {}) created TaskComment(id: {}) for Task(id: {})",
                 user.getId(), user.getUsername(), saved.getId(), task.getId());
+        return taskCommentMapper.toDTO(saved);
+    }
+
+    @Transactional
+    public TaskCommentResponseDTO reply(Long projectId, Long taskId, Long commentId, TaskCommentRequestDTO request) {
+
+        User user = userService.getAuthenticatedUser();
+        Project project = projectService.findById(projectId);
+
+        Task task = getTaskInProject(project.getId(), taskId);
+
+        TaskComment parentComment = getCommentInTask(commentId, task.getId());
+
+        TaskComment commentToBeSaved = TaskComment.builder()
+                .content(request.content())
+                .task(task)
+                .user(user)
+                .parentComment(parentComment)
+                .build();
+
+        TaskComment saved = repository.save(commentToBeSaved);
         return taskCommentMapper.toDTO(saved);
     }
 

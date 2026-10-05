@@ -35,6 +35,17 @@ public class TaskCommentController {
         return new ResponseEntity<>(comment, HttpStatus.CREATED);
     }
 
+    @PostMapping("/{commentId}/reply")
+    public ResponseEntity<TaskCommentResponseDTO> reply(
+            @PathVariable Long projectId,
+            @PathVariable Long taskId,
+            @PathVariable Long commentId,
+            @RequestBody @Valid TaskCommentRequestDTO request
+    ) {
+        TaskCommentResponseDTO comment = taskCommentService.reply(projectId, taskId, commentId, request);
+        return new ResponseEntity<>(comment, HttpStatus.CREATED);
+    }
+
     @GetMapping
     public ResponseEntity<List<TaskCommentResponseDTO>> findAll(
             @PathVariable Long projectId,

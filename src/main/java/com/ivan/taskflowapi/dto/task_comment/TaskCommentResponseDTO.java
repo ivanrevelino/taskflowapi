@@ -9,6 +9,7 @@ public record TaskCommentResponseDTO(
         String content,
         UserResponseDTO user,
         Long taskId,
+        Long parentCommentId,
         LocalDateTime createdAt
 ) {
 }

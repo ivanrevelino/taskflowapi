@@ -9,5 +9,6 @@ import org.mapstruct.Mapping;
 public interface TaskCommentMapper {
 
     @Mapping(source = "task.id", target = "taskId")
+    @Mapping(source = "parentComment.id", target = "parentCommentId")
     TaskCommentResponseDTO toDTO(TaskComment taskComment);
 }
