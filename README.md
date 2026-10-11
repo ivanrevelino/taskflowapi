@@ -1,26 +1,14 @@
 # TaskFlowAPI
 
-Uma API REST para gerenciar projetos e tarefas com autenticação JWT e controle de acesso baseado em papéis.
+REST API para gerenciar projetos e tarefas com autenticação JWT e controle de acesso baseado em papéis.
 
-## 🛠️ Stack Tecnológico
-
-- **Java 21**
-- **Spring Boot 4.1.0**
-- **Spring Data JPA**
-- **Spring Security**
-- **JWT (java-jwt 4.6.0)**
-- **PostgreSQL**
-- **MapStruct 1.6.0 Beta1**
-- **Lombok**
-- **SpringDoc OpenAPI 3.0.3**
-
-## 📋 Pré-requisitos
+## Requisitos
 
 - Java 21+
 - PostgreSQL 12+
 - Maven 3.6+
 
-## 🚀 Como executar
+## Setup
 
 ### 1. Clone o repositório
 
@@ -31,17 +19,12 @@ cd taskflowapi
 
 ### 2. Configure as variáveis de ambiente
 
-```bash
-cp .env.example .env
-```
-
-Edite o arquivo `.env`:
+Crie um arquivo `.env` na raiz do projeto:
 
 ```env
 DB_URL=jdbc:postgresql://localhost:5432/taskflow_db
 DB_USERNAME=seu_usuario
 DB_PASSWORD=sua_senha
-
 JWT_SECRET=sua_chave_secreta_muito_longa_aqui
 SERVER_PORT=8080
 ```
@@ -60,23 +43,26 @@ CREATE DATABASE taskflow_db;
 
 A API estará disponível em `http://localhost:8080`
 
-## 📚 Documentação
+## Stack
 
-Acesse o Swagger UI em:
+- Java 21
+- Spring Boot 4.1.0
+- Spring Security e JWT
+- Spring Data JPA
+- PostgreSQL
+- MapStruct 1.6.0
+- Lombok
+- SpringDoc OpenAPI 3.0.3
 
-```
-http://localhost:8080/swagger-ui.html
-```
+## Autenticação
 
-## 🔐 Autenticação
-
-Todos os endpoints protegidos exigem um JWT Bearer Token no header:
+Todos os endpoints protegidos exigem um JWT Bearer Token no header `Authorization`:
 
 ```
 Authorization: Bearer YOUR_JWT_TOKEN
 ```
 
-### Endpoints de Autenticação
+### Login e Registro
 
 **Registro:**
 ```bash
@@ -84,7 +70,6 @@ POST /auth/register
 Content-Type: application/json
 
 {
-  "name": "João",
   "username": "joao",
   "password": "senha123"
 }
@@ -104,74 +89,73 @@ Content-Type: application/json
 Response:
 ```json
 {
-  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "refreshToken": "..."
 }
 ```
 
-## 📌 Endpoints Principais
+## Endpoints
 
-### Projects
+### Autenticação
+- `POST /auth/login` - Login de usuário
+- `POST /auth/register` - Registro de novo usuário
+- `POST /auth/refresh` - Renovar token JWT
 
-```
-GET    /project              - Lista seus projetos
-POST   /project              - Criar novo projeto
-GET    /project/{id}         - Obter detalhes do projeto
-DELETE /project/{id}         - Deletar projeto
-```
+### Projetos
+- `GET /projects/me` - Listar projetos do usuário
+- `GET /projects/me/owned` - Listar projetos possuídos pelo usuário
+- `GET /projects/{id}` - Obter detalhes de um projeto
+- `POST /projects` - Criar novo projeto
+- `PUT /projects/{id}` - Atualizar projeto
+- `DELETE /projects/{id}` - Deletar projeto
 
-### Tasks
+### Tarefas
+- `GET /projects/{projectId}/tasks` - Listar tarefas
+- `GET /projects/{projectId}/tasks/filter?status=TO_DO` - Filtrar tarefas por status
+- `POST /projects/{projectId}/tasks` - Criar tarefa
+- `PUT /projects/{projectId}/tasks/{taskId}` - Atualizar tarefa
+- `PATCH /projects/{projectId}/tasks/{taskId}/complete` - Marcar como completa
+- `PATCH /projects/{projectId}/tasks/{taskId}/claim` - Atribuir tarefa a si mesmo
+- `PATCH /projects/{projectId}/tasks/{taskId}/release` - Liberar tarefa
+- `DELETE /projects/{projectId}/tasks/{taskId}` - Deletar tarefa
 
-```
-GET    /projects/{projectId}/tasks                    - Lista tarefas
-POST   /projects/{projectId}/tasks                    - Criar tarefa
-PATCH  /projects/{projectId}/tasks/{taskId}           - Marcar tarefa como completa
-GET    /projects/{projectId}/tasks/filter?status=...  - Filtrar tarefas por status
-DELETE /projects/{projectId}/tasks/{taskId}           - Deletar tarefa
-```
+### Comentários em Tarefas
+- `GET /projects/{projectId}/tasks/{taskId}/comments` - Listar comentários
+- `POST /projects/{projectId}/tasks/{taskId}/comments` - Criar comentário
+- `POST /projects/{projectId}/tasks/{taskId}/comments/{commentId}/reply` - Responder comentário
+- `PUT /projects/{projectId}/tasks/{taskId}/comments/{commentId}` - Atualizar comentário
+- `DELETE /projects/{projectId}/tasks/{taskId}/comments/{commentId}` - Deletar comentário
 
-### Users (Admin apenas)
+### Membros de Projeto
+- `GET /projects/{projectId}/members` - Listar membros
+- `POST /projects/{projectId}/members` - Adicionar membro
+- `DELETE /projects/{projectId}/members/{memberId}` - Remover membro
+- `DELETE /projects/{projectId}/members/leave` - Sair do projeto
 
-```
-GET    /users                  - Listar todos os usuários (paginado)
-POST   /users                  - Criar novo usuário
-GET    /users/{id}             - Obter usuário por ID
-GET    /users/findBy?name=...  - Buscar usuário por nome
-DELETE /users/{id}             - Deletar usuário
-```
+### Usuários
+- `GET /users/me` - Obter dados do usuário autenticado
+- `GET /users/search?username=...` - Buscar usuários
+- `PATCH /users/me/update/password` - Atualizar senha
+- `PATCH /users/me/update/username` - Atualizar username
 
-## 📊 Status das Tarefas
+## Status de Tarefas
 
 - `TO_DO` - A fazer
 - `IN_PROGRESS` - Em progresso
 - `COMPLETED` - Completa
 
-## 👥 Roles de Usuário
+## Papéis
 
-- `ADMIN` - Acesso total aos usuários
 - `USER` - Usuário comum
+- `ADMIN` - Acesso administrativo
 
-## 🏗️ Estrutura do Projeto
-
-```
-src/main/java/com/ivan/taskflowapi/
-├── controller/          REST Controllers
-├── service/             Lógica de negócio
-├── models/              Entidades JPA
-├── dto/                 Data Transfer Objects
-├── repository/          Data Access Layer
-├── security/            Configuração JWT
-├── mapper/              MapStruct Mappers
-├── exception/           Exceções customizadas
-└── infra/              Utilitários
-```
-
-## 🧪 Testes
+## Testes
 
 ```bash
 ./mvnw test
 ```
 
-## 📦 Build
+## Build
 
 ```bash
 ./mvnw clean package -DskipTests
@@ -179,36 +163,23 @@ src/main/java/com/ivan/taskflowapi/
 
 Gera JAR em `target/taskflowapi-0.0.1-SNAPSHOT.jar`
 
-## 📝 Exemplos de Uso
+## Documentação
 
-**Criar um projeto:**
-```bash
-curl -X POST http://localhost:8080/project \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer YOUR_TOKEN" \
-  -d '{
-    "name": "Novo Projeto",
-    "description": "Descrição do projeto"
-  }'
+Para mais informações sobre todos os endpoints, parâmetros e respostas, acesse a documentação do Swagger da aplicação em execução:
+
+```
+http://localhost:8080/swagger-ui.html
 ```
 
-**Criar uma tarefa:**
-```bash
-curl -X POST http://localhost:8080/projects/1/tasks \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer YOUR_TOKEN" \
-  -d '{
-    "title": "Tarefa 1",
-    "description": "Descrição da tarefa"
-  }'
+A documentação OpenAPI também está disponível em:
+
+```
+http://localhost:8080/v3/api-docs
 ```
 
-**Filtrar tarefas por status:**
-```bash
-curl http://localhost:8080/projects/1/tasks/filter?status=TO_DO \
-  -H "Authorization: Bearer YOUR_TOKEN"
-```
+## Contato
 
-## 👤 Autor
+Para dúvidas ou sugestões, entre em contato através de:
 
-Ivan Revelino - [@ivanrevelino](https://github.com/ivanrevelino)
+- Email: ivanmbilane@gmail.com
+- GitHub: [@ivanrevelino](https://github.com/ivanrevelino)
