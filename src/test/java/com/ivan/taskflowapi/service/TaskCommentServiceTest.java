@@ -61,7 +61,7 @@ class TaskCommentServiceTest {
         ProjectMember member = member(project, user, ProjectMemberRole.MEMBER);
         TaskCommentRequestDTO request = new TaskCommentRequestDTO("First comment");
         TaskComment saved = TaskComment.builder().id(1L).content(request.content()).task(task).user(user).build();
-        TaskCommentResponseDTO response = new TaskCommentResponseDTO(1L, request.content(), null, task.getId(), LocalDateTime.now());
+        TaskCommentResponseDTO response = new TaskCommentResponseDTO(1L, request.content(), null, task.getId(), null, LocalDateTime.now());
 
         when(userService.getAuthenticatedUser()).thenReturn(user);
         when(projectRepository.findById(project.getId())).thenReturn(Optional.of(project));
