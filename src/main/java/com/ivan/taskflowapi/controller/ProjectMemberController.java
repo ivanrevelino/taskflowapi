@@ -5,6 +5,7 @@ import com.ivan.taskflowapi.dto.project_member.ProjectMemberResponseDTO;
 import com.ivan.taskflowapi.models.ProjectMember;
 import com.ivan.taskflowapi.service.ProjectMemberService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@Tag(name = "Project members")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/projects/{projectId}/members")

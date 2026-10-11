@@ -3,6 +3,7 @@ package com.ivan.taskflowapi.controller;
 import com.ivan.taskflowapi.dto.task_comment.TaskCommentRequestDTO;
 import com.ivan.taskflowapi.dto.task_comment.TaskCommentResponseDTO;
 import com.ivan.taskflowapi.service.TaskCommentService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
+@Tag(name = "Task comments")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/projects/{projectId}/tasks/{taskId}/comments")

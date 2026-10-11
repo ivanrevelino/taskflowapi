@@ -4,6 +4,7 @@ import com.ivan.taskflowapi.dto.user.UpdatePasswordDTO;
 import com.ivan.taskflowapi.dto.user.UpdateUsernameDTO;
 import com.ivan.taskflowapi.dto.user.UserResponseDTO;
 import com.ivan.taskflowapi.service.UserService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -11,6 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+@Tag(name = "Users")
 @RestController
 @RequestMapping("/users")
 @RequiredArgsConstructor
