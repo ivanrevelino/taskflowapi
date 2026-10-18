@@ -2,6 +2,7 @@ package com.ivan.taskflowapi.dto.project;
 
 import com.ivan.taskflowapi.dto.project_member.ProjectMemberResponseDTO;
 import com.ivan.taskflowapi.dto.user.UserResponseDTO;
+import com.ivan.taskflowapi.models.User;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -20,4 +21,10 @@ public class ProjectResponseDTO {
     private String description;
     private UserResponseDTO owner;
     private List<ProjectMemberResponseDTO> members;
+
+    public ProjectResponseDTO(Long id, String name, String description) {
+        this.id = id;
+        this.name = name;
+        this.description = description;
+    }
 }

@@ -3,7 +3,6 @@ package com.ivan.taskflowapi.controller;
 import com.ivan.taskflowapi.dto.project.ProjectRequestDTO;
 import com.ivan.taskflowapi.dto.project.ProjectResponseDTO;
 import com.ivan.taskflowapi.dto.project.ProjectSummaryResponse;
-import com.ivan.taskflowapi.models.Project;
 import com.ivan.taskflowapi.service.ProjectService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -17,8 +16,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @Tag(name = "Projects")
 @RequestMapping("/projects")

@@ -1,7 +1,9 @@
 package com.ivan.taskflowapi.util;
 
 import com.ivan.taskflowapi.models.Project;
+import com.ivan.taskflowapi.models.ProjectMember;
 import com.ivan.taskflowapi.models.User;
+import com.ivan.taskflowapi.models.enums.ProjectMemberRole;
 import com.ivan.taskflowapi.models.enums.UserRoles;
 
 import java.time.LocalDateTime;
@@ -35,6 +37,19 @@ public class Generator {
                 .description(description)
                 .owner(user)
                 .createdAt(LocalDateTime.now())
+                .build();
+    }
+
+    public static ProjectMember generateTestProjectMember() {
+
+        User user = generateTestUser(1L, "Vasquinho", "vasquinho@va");
+
+        return ProjectMember.builder()
+                .role(ProjectMemberRole.OWNER)
+                .user(user)
+                .joinedAt(LocalDateTime.now())
+                .project(generateTestProject(1L, "Axel Venue", "Project to Manage", user))
+                .invitedBy(null)
                 .build();
     }
 }
