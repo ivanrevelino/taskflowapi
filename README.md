@@ -217,6 +217,7 @@ Também disponível em formato OpenAPI:
 ```
 http://localhost:8080/v3/api-docs
 ```
+Os endpoints protegidos usam JWT Bearer. Faça login, copie o `accessToken` e use **Authorize** no Swagger UI para testar as requisições autenticadas.
 ---
 🧪 Testes e Build
 ```bash
