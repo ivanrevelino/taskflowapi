@@ -6,7 +6,7 @@ import com.ivan.taskflowapi.dto.auth.AuthResponse;
 import com.ivan.taskflowapi.dto.auth.RefreshTokenRequest;
 import com.ivan.taskflowapi.dto.user.UserResponseDTO;
 import com.ivan.taskflowapi.exception.BadRequestException;
-import com.ivan.taskflowapi.security.SecurityFilter;
+import com.ivan.taskflowapi.security.filters.SecurityFilter;
 import com.ivan.taskflowapi.security.jwt.JWTTokenProvider;
 import com.ivan.taskflowapi.service.AuthService;
 import org.junit.jupiter.api.Test;

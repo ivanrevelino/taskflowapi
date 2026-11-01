@@ -4,7 +4,7 @@ import com.ivan.taskflowapi.dto.task_comment.TaskCommentRequestDTO;
 import com.ivan.taskflowapi.dto.task_comment.TaskCommentResponseDTO;
 import com.ivan.taskflowapi.exception.ForbiddenException;
 import com.ivan.taskflowapi.exception.ResourceNotFoundException;
-import com.ivan.taskflowapi.security.SecurityFilter;
+import com.ivan.taskflowapi.security.filters.SecurityFilter;
 import com.ivan.taskflowapi.security.jwt.JWTTokenProvider;
 import com.ivan.taskflowapi.service.TaskCommentService;
 import org.junit.jupiter.api.Test;

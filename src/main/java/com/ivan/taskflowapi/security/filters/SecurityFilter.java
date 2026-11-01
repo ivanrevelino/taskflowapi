@@ -1,4 +1,4 @@
-package com.ivan.taskflowapi.security;
+package com.ivan.taskflowapi.security.filters;
 
 import com.ivan.taskflowapi.repository.UserRepository;
 import com.ivan.taskflowapi.security.jwt.JWTTokenProvider;

@@ -5,7 +5,7 @@ import com.ivan.taskflowapi.dto.user.UpdateUsernameDTO;
 import com.ivan.taskflowapi.dto.user.UserResponseDTO;
 import com.ivan.taskflowapi.exception.BadRequestException;
 import com.ivan.taskflowapi.models.enums.UserRoles;
-import com.ivan.taskflowapi.security.SecurityFilter;
+import com.ivan.taskflowapi.security.filters.SecurityFilter;
 import com.ivan.taskflowapi.security.jwt.JWTTokenProvider;
 import com.ivan.taskflowapi.service.UserService;
 import org.junit.jupiter.api.Test;

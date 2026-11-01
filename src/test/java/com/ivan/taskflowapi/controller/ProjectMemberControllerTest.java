@@ -6,7 +6,7 @@ import com.ivan.taskflowapi.exception.BadRequestException;
 import com.ivan.taskflowapi.exception.ForbiddenException;
 import com.ivan.taskflowapi.exception.ResourceNotFoundException;
 import com.ivan.taskflowapi.models.enums.ProjectMemberRole;
-import com.ivan.taskflowapi.security.SecurityFilter;
+import com.ivan.taskflowapi.security.filters.SecurityFilter;
 import com.ivan.taskflowapi.security.jwt.JWTTokenProvider;
 import com.ivan.taskflowapi.service.ProjectMemberService;
 import org.junit.jupiter.api.Test;
