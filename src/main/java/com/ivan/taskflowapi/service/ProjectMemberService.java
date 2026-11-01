@@ -51,6 +51,16 @@ public class ProjectMemberService {
         repository.save(projectMember);
     }
 
+    public void addInvitedMember(Project project, User user, User invitedBy) {
+        ProjectMember projectMember = ProjectMember.builder()
+                .role(ProjectMemberRole.MEMBER)
+                .user(user)
+                .project(project)
+                .invitedBy(invitedBy)
+                .build();
+        repository.save(projectMember);
+    }
+
     public ProjectMemberResponseDTO addMember(Long projectId, AddMemberRequestDTO request) {
         User owner = userService.getAuthenticatedUser();
         Project project = projectRepository.findById(projectId)
