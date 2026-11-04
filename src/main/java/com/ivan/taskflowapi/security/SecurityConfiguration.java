@@ -36,8 +36,8 @@ public class SecurityConfiguration {
                                 "/v3/api-docs/**").permitAll()
                         .requestMatchers("/project/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated())
-                .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(rateLimiterFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
 

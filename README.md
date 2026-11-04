@@ -81,7 +81,7 @@ Authorization: Bearer SEU_JWT_TOKEN
 Registro
 Request
 ```http
-POST /auth/register
+POST api/v1/auth/register
 Content-Type: application/json
 
 {
@@ -103,7 +103,7 @@ Response (201 Created)
 Login
 Request
 ```http
-POST /auth/login
+POST api/v1/auth/login
 Content-Type: application/json
 
 {
@@ -121,7 +121,7 @@ Response (200 OK)
 Refresh Token
 Request
 ```http
-POST /auth/refresh
+POST api/v1/auth/refresh
 Content-Type: application/json
 
 {
@@ -133,7 +133,7 @@ Content-Type: application/json
 Criar Projeto
 Request
 ```http
-POST /projects
+POST api/v1/projects
 Authorization: Bearer SEU_TOKEN
 Content-Type: application/json
 
@@ -160,13 +160,13 @@ Response (201 Created)
 ```
 Listar Meus Projetos
 ```http
-GET /projects/me
+GET api/v1/projects/me
 Authorization: Bearer SEU_TOKEN
 ```
 Criar Tarefa
 Request
 ```http
-POST /projects/1/tasks
+POST api/v1/projects/1/tasks
 Authorization: Bearer SEU_TOKEN
 Content-Type: application/json
 
@@ -189,33 +189,33 @@ Response (201 Created)
 ```
 Marcar Tarefa como Completa
 ```http
-PATCH /projects/1/tasks/1/complete
+PATCH api/v1/projects/1/tasks/1/complete
 Authorization: Bearer SEU_TOKEN
 ```
 Atribuir Tarefa a Si Mesmo (Claim)
 ```http
-PATCH /projects/1/tasks/1/claim
+PATCH api/v1/projects/1/tasks/1/claim
 Authorization: Bearer SEU_TOKEN
 ```
 Liberar Tarefa (Release)
 ```http
-PATCH /projects/1/tasks/1/release
+PATCH api/v1/projects/1/tasks/1/release
 Authorization: Bearer SEU_TOKEN
 ```
 Filtrar Tarefas por Status
 ```http
-GET /projects/1/tasks/filter?status=TO_DO
+GET api/v1/projects/1/tasks/filter?status=TO_DO
 Authorization: Bearer SEU_TOKEN
 ```
 ---
 📖 Documentação Completa (Swagger)
 Para ver todos os endpoints, parâmetros, schemas e testar interativamente, acesse a documentação Swagger enquanto a aplicação estiver rodando:
 ```
-http://localhost:8080/swagger-ui.html
+http://localhost:8080/api/v1/swagger-ui.html
 ```
 Também disponível em formato OpenAPI:
 ```
-http://localhost:8080/v3/api-docs
+http://localhost:8080api/v1/v3/api-docs
 ```
 Os endpoints protegidos usam JWT Bearer. Faça login, copie o `accessToken` e use **Authorize** no Swagger UI para testar as requisições autenticadas.
 ---
