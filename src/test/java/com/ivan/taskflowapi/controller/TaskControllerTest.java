@@ -52,7 +52,7 @@ class TaskControllerTest {
         TaskRequestDTO request = new TaskRequestDTO("Task", "Description");
         Mockito.when(taskService.create(request, 1L)).thenReturn(task(2L, "Task", "Description"));
 
-        mockMvc.perform(post("/projects/1/tasks")
+        mockMvc.perform(post("/api/v1/projects/1/tasks")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
@@ -63,7 +63,7 @@ class TaskControllerTest {
 
     @Test
     void createShouldRejectBlankTitle() throws Exception {
-        mockMvc.perform(post("/projects/1/tasks")
+        mockMvc.perform(post("/api/v1/projects/1/tasks")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {"title":" ","description":"Description"}
@@ -73,7 +73,7 @@ class TaskControllerTest {
 
     @Test
     void completeTaskShouldReturnNoContent() throws Exception {
-        mockMvc.perform(patch("/projects/1/tasks/2/complete"))
+        mockMvc.perform(patch("/api/v1/projects/1/tasks/2/complete"))
                 .andExpect(status().isNoContent());
 
         Mockito.verify(taskService).completeTask(1L, 2L);
@@ -81,7 +81,7 @@ class TaskControllerTest {
 
     @Test
     void claimTaskShouldReturnNoContent() throws Exception {
-        mockMvc.perform(patch("/projects/1/tasks/2/claim"))
+        mockMvc.perform(patch("/api/v1/projects/1/tasks/2/claim"))
                 .andExpect(status().isNoContent());
 
         Mockito.verify(taskService).claim(1L, 2L);
@@ -92,13 +92,13 @@ class TaskControllerTest {
         Mockito.doThrow(new BadRequestException("This task is being assigned"))
                 .when(taskService).claim(1L, 2L);
 
-        mockMvc.perform(patch("/projects/1/tasks/2/claim"))
+        mockMvc.perform(patch("/api/v1/projects/1/tasks/2/claim"))
                 .andExpect(status().isBadRequest());
     }
 
     @Test
     void releaseTaskShouldReturnNoContent() throws Exception {
-        mockMvc.perform(patch("/projects/1/tasks/2/release"))
+        mockMvc.perform(patch("/api/v1/projects/1/tasks/2/release"))
                 .andExpect(status().isNoContent());
 
         Mockito.verify(taskService).release(1L, 2L);
@@ -109,7 +109,7 @@ class TaskControllerTest {
         Mockito.doThrow(new ForbiddenException("Not task claimer"))
                 .when(taskService).release(1L, 2L);
 
-        mockMvc.perform(patch("/projects/1/tasks/2/release"))
+        mockMvc.perform(patch("/api/v1/projects/1/tasks/2/release"))
                 .andExpect(status().isForbidden());
     }
 
@@ -119,7 +119,7 @@ class TaskControllerTest {
         Mockito.when(taskService.update(1L, 2L, request))
                 .thenReturn(task(2L, "Updated", "Updated description"));
 
-        mockMvc.perform(put("/projects/1/tasks/2")
+        mockMvc.perform(put("/api/v1/projects/1/tasks/2")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
@@ -133,7 +133,7 @@ class TaskControllerTest {
         Mockito.when(taskService.update(1L, 2L, request))
                 .thenThrow(new ResourceNotFoundException("Task not found"));
 
-        mockMvc.perform(put("/projects/1/tasks/2")
+        mockMvc.perform(put("/api/v1/projects/1/tasks/2")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isNotFound());
@@ -141,7 +141,7 @@ class TaskControllerTest {
 
     @Test
     void deleteShouldReturnNoContent() throws Exception {
-        mockMvc.perform(delete("/projects/1/tasks/2"))
+        mockMvc.perform(delete("/api/v1/projects/1/tasks/2"))
                 .andExpect(status().isNoContent());
 
         Mockito.verify(taskService).delete(2L, 1L);
@@ -152,7 +152,7 @@ class TaskControllerTest {
         Mockito.doThrow(new ResourceNotFoundException("Task not found"))
                 .when(taskService).delete(2L, 1L);
 
-        mockMvc.perform(delete("/projects/1/tasks/2"))
+        mockMvc.perform(delete("/api/v1/projects/1/tasks/2"))
                 .andExpect(status().isNotFound());
     }
 

@@ -52,7 +52,7 @@ class ProjectControllerTest {
         Mockito.when(projectService.findByIdResponseDTO(1L))
                 .thenReturn(new ProjectResponseDTO(1L, "Projecto XYZ", "IDK"));
 
-        mockMvc.perform(get("/projects/1")
+        mockMvc.perform(get("/api/v1/projects/1")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(1L))
@@ -67,7 +67,7 @@ class ProjectControllerTest {
         Mockito.when(projectService.create(request))
                 .thenReturn(new ProjectResponseDTO(1L, "Projecto XYZ", "IDK"));
 
-        mockMvc.perform(post("/projects")
+        mockMvc.perform(post("/api/v1/projects")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
@@ -78,7 +78,7 @@ class ProjectControllerTest {
 
     @Test
     void createShouldRejectBlankFields() throws Exception {
-        mockMvc.perform(post("/projects")
+        mockMvc.perform(post("/api/v1/projects")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {"name":" ","description":"Description"}
@@ -93,7 +93,7 @@ class ProjectControllerTest {
         Mockito.when(projectService.findByIdResponseDTO(1L))
                 .thenThrow(ResourceNotFoundException.class);
 
-        mockMvc.perform(get("/projects/1")
+        mockMvc.perform(get("/api/v1/projects/1")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound());
     }
@@ -104,7 +104,7 @@ class ProjectControllerTest {
         Mockito.when(projectService.update(1L, request))
                 .thenReturn(new ProjectResponseDTO(1L, "Updated", "Updated description"));
 
-        mockMvc.perform(put("/projects/1")
+        mockMvc.perform(put("/api/v1/projects/1")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
@@ -118,7 +118,7 @@ class ProjectControllerTest {
         Mockito.when(projectService.update(Mockito.eq(1L), Mockito.any(ProjectRequestDTO.class)))
                 .thenThrow(new ForbiddenException("Not project owner"));
 
-        mockMvc.perform(put("/projects/1")
+        mockMvc.perform(put("/api/v1/projects/1")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isForbidden());
@@ -126,7 +126,7 @@ class ProjectControllerTest {
 
     @Test
     void deleteShouldReturnNoContent() throws Exception {
-        mockMvc.perform(delete("/projects/1"))
+        mockMvc.perform(delete("/api/v1/projects/1"))
                 .andExpect(status().isNoContent());
 
         Mockito.verify(projectService).delete(1L);
@@ -137,7 +137,7 @@ class ProjectControllerTest {
         Mockito.doThrow(new ResourceNotFoundException("Project not found"))
                 .when(projectService).delete(1L);
 
-        mockMvc.perform(delete("/projects/1"))
+        mockMvc.perform(delete("/api/v1/projects/1"))
                 .andExpect(status().isNotFound());
     }
 }

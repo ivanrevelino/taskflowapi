@@ -51,7 +51,7 @@ class TaskCommentControllerTest {
         Mockito.when(taskCommentService.create(1L, 2L, request))
                 .thenReturn(new TaskCommentResponseDTO(3L, "Comment", null, 2L, null, null));
 
-        mockMvc.perform(post("/projects/1/tasks/2/comments")
+        mockMvc.perform(post("/api/v1/projects/1/tasks/2/comments")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
@@ -61,7 +61,7 @@ class TaskCommentControllerTest {
 
     @Test
     void createShouldRejectBlankComment() throws Exception {
-        mockMvc.perform(post("/projects/1/tasks/2/comments")
+        mockMvc.perform(post("/api/v1/projects/1/tasks/2/comments")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {"content":" "}
@@ -75,7 +75,7 @@ class TaskCommentControllerTest {
         Mockito.when(taskCommentService.reply(1L, 2L, 3L, request))
                 .thenReturn(new TaskCommentResponseDTO(4L, "Reply", null, 2L, 3L, null));
 
-        mockMvc.perform(post("/projects/1/tasks/2/comments/3/reply")
+        mockMvc.perform(post("/api/v1/projects/1/tasks/2/comments/3/reply")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
@@ -89,7 +89,7 @@ class TaskCommentControllerTest {
         Mockito.when(taskCommentService.reply(1L, 2L, 3L, request))
                 .thenThrow(new ResourceNotFoundException("Comment not found"));
 
-        mockMvc.perform(post("/projects/1/tasks/2/comments/3/reply")
+        mockMvc.perform(post("/api/v1/projects/1/tasks/2/comments/3/reply")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isNotFound());
@@ -100,7 +100,7 @@ class TaskCommentControllerTest {
         Mockito.when(taskCommentService.findAll(1L, 2L))
                 .thenReturn(List.of(new TaskCommentResponseDTO(3L, "Comment", null, 2L, null, null)));
 
-        mockMvc.perform(get("/projects/1/tasks/2/comments"))
+        mockMvc.perform(get("/api/v1/projects/1/tasks/2/comments"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].id").value(3L))
                 .andExpect(jsonPath("$[0].content").value("Comment"));
@@ -112,7 +112,7 @@ class TaskCommentControllerTest {
         Mockito.when(taskCommentService.update(1L, 2L, 3L, request))
                 .thenReturn(new TaskCommentResponseDTO(3L, "Updated", null, 2L, null, null));
 
-        mockMvc.perform(put("/projects/1/tasks/2/comments/3")
+        mockMvc.perform(put("/api/v1/projects/1/tasks/2/comments/3")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
@@ -125,7 +125,7 @@ class TaskCommentControllerTest {
         Mockito.when(taskCommentService.update(1L, 2L, 3L, request))
                 .thenThrow(new ForbiddenException("You're not authorized to update this comment"));
 
-        mockMvc.perform(put("/projects/1/tasks/2/comments/3")
+        mockMvc.perform(put("/api/v1/projects/1/tasks/2/comments/3")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isForbidden());
@@ -133,7 +133,7 @@ class TaskCommentControllerTest {
 
     @Test
     void deleteShouldReturnNoContent() throws Exception {
-        mockMvc.perform(delete("/projects/1/tasks/2/comments/3"))
+        mockMvc.perform(delete("/api/v1/projects/1/tasks/2/comments/3"))
                 .andExpect(status().isNoContent());
 
         Mockito.verify(taskCommentService).delete(1L, 2L, 3L);
@@ -144,7 +144,7 @@ class TaskCommentControllerTest {
         Mockito.doThrow(new ForbiddenException("Not authorized"))
                 .when(taskCommentService).delete(1L, 2L, 3L);
 
-        mockMvc.perform(delete("/projects/1/tasks/2/comments/3"))
+        mockMvc.perform(delete("/api/v1/projects/1/tasks/2/comments/3"))
                 .andExpect(status().isForbidden());
     }
 }

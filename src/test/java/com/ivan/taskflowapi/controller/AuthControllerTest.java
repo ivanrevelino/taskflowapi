@@ -47,7 +47,7 @@ class AuthControllerTest {
         AuthLoginDTO request = new AuthLoginDTO("member01", "password");
         Mockito.when(authService.login(request)).thenReturn(new AuthResponse("access", "refresh"));
 
-        mockMvc.perform(post("/auth/login")
+        mockMvc.perform(post("/api/v1/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
@@ -57,7 +57,7 @@ class AuthControllerTest {
 
     @Test
     void loginShouldRejectBlankCredentials() throws Exception {
-        mockMvc.perform(post("/auth/login")
+        mockMvc.perform(post("/api/v1/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {"username":"","password":""}
@@ -75,7 +75,7 @@ class AuthControllerTest {
                 .build();
         Mockito.when(authService.register(request)).thenReturn(response);
 
-        mockMvc.perform(post("/auth/register")
+        mockMvc.perform(post("/api/v1/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
@@ -89,7 +89,7 @@ class AuthControllerTest {
         Mockito.when(authService.register(request))
                 .thenThrow(new BadRequestException("User already exists"));
 
-        mockMvc.perform(post("/auth/register")
+        mockMvc.perform(post("/api/v1/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest());
@@ -100,7 +100,7 @@ class AuthControllerTest {
         RefreshTokenRequest request = new RefreshTokenRequest("valid-refresh");
         Mockito.when(authService.refresh(request)).thenReturn(new AuthResponse("new-access", "valid-refresh"));
 
-        mockMvc.perform(post("/auth/refresh")
+        mockMvc.perform(post("/api/v1/auth/refresh")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
@@ -110,7 +110,7 @@ class AuthControllerTest {
 
     @Test
     void refreshShouldRejectBlankToken() throws Exception {
-        mockMvc.perform(post("/auth/refresh")
+        mockMvc.perform(post("/api/v1/auth/refresh")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {"token":""}

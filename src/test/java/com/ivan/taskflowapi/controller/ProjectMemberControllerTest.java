@@ -54,7 +54,7 @@ class ProjectMemberControllerTest {
         response.setRole(ProjectMemberRole.MEMBER);
         Mockito.when(projectMemberService.addMember(1L, request)).thenReturn(response);
 
-        mockMvc.perform(post("/projects/1/members")
+        mockMvc.perform(post("/api/v1/projects/1/members")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
@@ -68,7 +68,7 @@ class ProjectMemberControllerTest {
         Mockito.when(projectMemberService.addMember(1L, request))
                 .thenThrow(new BadRequestException("User already is a member"));
 
-        mockMvc.perform(post("/projects/1/members")
+        mockMvc.perform(post("/api/v1/projects/1/members")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest());
@@ -81,7 +81,7 @@ class ProjectMemberControllerTest {
         member.setRole(ProjectMemberRole.MEMBER);
         Mockito.when(projectMemberService.findAll(1L)).thenReturn(List.of(member));
 
-        mockMvc.perform(get("/projects/1/members"))
+        mockMvc.perform(get("/api/v1/projects/1/members"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].id").value(5L))
                 .andExpect(jsonPath("$[0].role").value("MEMBER"));
@@ -92,13 +92,13 @@ class ProjectMemberControllerTest {
         Mockito.when(projectMemberService.findAll(1L))
                 .thenThrow(new ResourceNotFoundException("You are not a member of this project"));
 
-        mockMvc.perform(get("/projects/1/members"))
+        mockMvc.perform(get("/api/v1/projects/1/members"))
                 .andExpect(status().isNotFound());
     }
 
     @Test
     void deleteMemberShouldReturnNoContent() throws Exception {
-        mockMvc.perform(delete("/projects/1/members/2"))
+        mockMvc.perform(delete("/api/v1/projects/1/members/2"))
                 .andExpect(status().isNoContent());
 
         Mockito.verify(projectMemberService).delete(1L, 2L);
@@ -109,13 +109,13 @@ class ProjectMemberControllerTest {
         Mockito.doThrow(new ForbiddenException("You are not the owner of this project"))
                 .when(projectMemberService).delete(1L, 2L);
 
-        mockMvc.perform(delete("/projects/1/members/2"))
+        mockMvc.perform(delete("/api/v1/projects/1/members/2"))
                 .andExpect(status().isForbidden());
     }
 
     @Test
     void leaveProjectShouldReturnNoContent() throws Exception {
-        mockMvc.perform(delete("/projects/1/members/leave"))
+        mockMvc.perform(delete("/api/v1/projects/1/members/leave"))
                 .andExpect(status().isNoContent());
 
         Mockito.verify(projectMemberService).leaveProject(1L);
@@ -126,7 +126,7 @@ class ProjectMemberControllerTest {
         Mockito.doThrow(new BadRequestException("You cannot leave your own project"))
                 .when(projectMemberService).leaveProject(1L);
 
-        mockMvc.perform(delete("/projects/1/members/leave"))
+        mockMvc.perform(delete("/api/v1/projects/1/members/leave"))
                 .andExpect(status().isBadRequest());
     }
 }

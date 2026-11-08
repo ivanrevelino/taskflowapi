@@ -55,7 +55,7 @@ class UserControllerTest {
                 .build();
         Mockito.when(userService.getAuthenticatedUserDTO()).thenReturn(response);
 
-        mockMvc.perform(get("/users/me"))
+        mockMvc.perform(get("/api/v1/users/me"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(1L))
                 .andExpect(jsonPath("$.username").value("member01"));
@@ -65,7 +65,7 @@ class UserControllerTest {
     void updatePasswordShouldReturnNoContent() throws Exception {
         UpdatePasswordDTO request = new UpdatePasswordDTO("old-password", "new-password");
 
-        mockMvc.perform(patch("/users/me/update/password")
+        mockMvc.perform(patch("/api/v1/users/me/update/password")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isNoContent());
@@ -75,7 +75,7 @@ class UserControllerTest {
 
     @Test
     void updatePasswordShouldRejectMissingBody() throws Exception {
-        mockMvc.perform(patch("/users/me/update/password")
+        mockMvc.perform(patch("/api/v1/users/me/update/password")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest());
     }
@@ -84,7 +84,7 @@ class UserControllerTest {
     void updateUsernameShouldReturnNoContent() throws Exception {
         UpdateUsernameDTO request = new UpdateUsernameDTO("new-name");
 
-        mockMvc.perform(patch("/users/me/update/username")
+        mockMvc.perform(patch("/api/v1/users/me/update/username")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isNoContent());
@@ -98,7 +98,7 @@ class UserControllerTest {
         Mockito.doThrow(new BadRequestException("Username is already in use"))
                 .when(userService).updateUsername(request);
 
-        mockMvc.perform(patch("/users/me/update/username")
+        mockMvc.perform(patch("/api/v1/users/me/update/username")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest());
