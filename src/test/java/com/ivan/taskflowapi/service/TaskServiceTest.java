@@ -72,7 +72,7 @@ class TaskServiceTest {
 
         when(userService.getAuthenticatedUser()).thenReturn(user);
         when(projectService.findById(1L)).thenReturn(project);
-        when(repository.findById(1L)).thenReturn(Optional.of(task));
+        when(repository.findByIdForUpdate(1L)).thenReturn(Optional.of(task));
 
         taskService.claim(1L, 1L);
         assertThat(task.getStatus()).isEqualTo(TaskStatus.IN_PROGRESS);
@@ -101,7 +101,7 @@ class TaskServiceTest {
 
         when(userService.getAuthenticatedUser()).thenReturn(user);
         when(projectService.findById(1L)).thenReturn(project);
-        when(repository.findById(1L)).thenReturn(Optional.of(task));
+        when(repository.findByIdForUpdate(1L)).thenReturn(Optional.of(task));
 
         assertThatThrownBy(() -> taskService.claim(1L, 1L))
                 .isInstanceOf(BadRequestException.class)
@@ -131,7 +131,7 @@ class TaskServiceTest {
 
         when(userService.getAuthenticatedUser()).thenReturn(user);
         when(projectService.findById(1L)).thenReturn(project);
-        when(repository.findById(1L)).thenReturn(Optional.of(task));
+        when(repository.findByIdForUpdate(1L)).thenReturn(Optional.of(task));
 
         assertThatThrownBy(() -> taskService.claim(1L, 1L))
                 .isInstanceOf(BadRequestException.class)
@@ -162,7 +162,7 @@ class TaskServiceTest {
 
         when(userService.getAuthenticatedUser()).thenReturn(user);
         when(projectService.findById(1L)).thenReturn(project);
-        when(repository.findById(1L)).thenReturn(Optional.of(task));
+        when(repository.findByIdForUpdate(1L)).thenReturn(Optional.of(task));
 
         assertThatThrownBy(() -> taskService.claim(1L, 1L))
                 .isInstanceOf(ForbiddenException.class)

@@ -107,7 +107,8 @@ public class TaskService {
 
         User user = userService.getAuthenticatedUser();
         Project project = projectService.findById(projectId);
-        Task task = this.findById(taskId);
+        Task task = repository.findByIdForUpdate(taskId)
+                .orElseThrow(() -> new ResourceNotFoundException("Task Not Found"));
 
         ensureTaskBelongsToProject(task, project);
 
