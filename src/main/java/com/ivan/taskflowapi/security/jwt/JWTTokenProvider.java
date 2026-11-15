@@ -35,8 +35,7 @@ public class JWTTokenProvider {
         }
     }
 
-    public String verificate(String token) {
-
+    public String verify(String token) {
         try {
             Algorithm algorithm = Algorithm.HMAC256(secret);
             return JWT.require(algorithm)
@@ -45,8 +44,7 @@ public class JWTTokenProvider {
                     .verify(token)
                     .getSubject();
         } catch (JWTVerificationException e) {
-            return null;
+            throw new InvalidJwtAuthenticationException("Invalid or expired JWT", e);
         }
     }
-
 }
