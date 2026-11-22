@@ -130,4 +130,21 @@ public class ProjectInviteService {
         inviteRepository.save(invite);
     }
 
+    public void reject(Long inviteId) {
+        User user = userService.getAuthenticatedUser();
+        ProjectInvite invite = inviteRepository.findById(inviteId)
+                .orElseThrow(() -> new ResourceNotFoundException("Invitation not found"));
+
+        if (!invite.getInvited().getId().equals(user.getId())) {
+            throw new ForbiddenException("This invitation does not belong to you");
+        }
+
+        if (invite.getStatus() != InviteStatus.PENDING) {
+            throw new BadRequestException("Only pending invitations can be rejected");
+        }
+
+        invite.setStatus(InviteStatus.REJECTED);
+        inviteRepository.save(invite);
+    }
+
 }

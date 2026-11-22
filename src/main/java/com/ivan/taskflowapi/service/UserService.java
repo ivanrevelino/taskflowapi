@@ -2,17 +2,13 @@ package com.ivan.taskflowapi.service;
 
 import com.ivan.taskflowapi.dto.user.UpdatePasswordDTO;
 import com.ivan.taskflowapi.dto.user.UpdateUsernameDTO;
-import com.ivan.taskflowapi.dto.user.UserRequestDTO;
 import com.ivan.taskflowapi.dto.user.UserResponseDTO;
 import com.ivan.taskflowapi.exception.BadRequestException;
-import com.ivan.taskflowapi.exception.ForbiddenException;
 import com.ivan.taskflowapi.exception.ResourceNotFoundException;
 import com.ivan.taskflowapi.mapper.UserMapper;
 import com.ivan.taskflowapi.models.User;
 import com.ivan.taskflowapi.repository.UserRepository;
 import jakarta.transaction.Transactional;
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;

@@ -2,15 +2,10 @@ package com.ivan.taskflowapi.service;
 
 import com.ivan.taskflowapi.dto.task_comment.TaskCommentRequestDTO;
 import com.ivan.taskflowapi.dto.task_comment.TaskCommentResponseDTO;
-import com.ivan.taskflowapi.exception.BadRequestException;
 import com.ivan.taskflowapi.exception.ForbiddenException;
 import com.ivan.taskflowapi.exception.ResourceNotFoundException;
 import com.ivan.taskflowapi.mapper.TaskCommentMapper;
-import com.ivan.taskflowapi.models.Project;
-import com.ivan.taskflowapi.models.ProjectMember;
-import com.ivan.taskflowapi.models.Task;
-import com.ivan.taskflowapi.models.TaskComment;
-import com.ivan.taskflowapi.models.User;
+import com.ivan.taskflowapi.models.*;
 import com.ivan.taskflowapi.models.enums.ProjectMemberRole;
 import com.ivan.taskflowapi.repository.ProjectMemberRepository;
 import com.ivan.taskflowapi.repository.ProjectRepository;

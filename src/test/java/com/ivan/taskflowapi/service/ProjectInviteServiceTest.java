@@ -301,6 +301,61 @@ class ProjectInviteServiceTest {
                 .hasMessage("Invitation not found");
     }
 
+    @Test
+    void rejectMarksPendingInvitationAsRejected() {
+        User invited = user(2L);
+        ProjectInvite invite = invite(5L, project(10L, user(1L)), invited, user(1L),
+                LocalDateTime.now().plusDays(1));
+        when(userService.getAuthenticatedUser()).thenReturn(invited);
+        when(inviteRepository.findById(5L)).thenReturn(Optional.of(invite));
+        when(inviteRepository.save(invite)).thenReturn(invite);
+
+        projectInviteService.reject(5L);
+
+        assertThat(invite.getStatus()).isEqualTo(InviteStatus.REJECTED);
+        verify(inviteRepository).save(invite);
+    }
+
+    @Test
+    void rejectDoesNotAllowAnotherUserToRejectInvitation() {
+        ProjectInvite invite = invite(5L, project(10L, user(1L)), user(2L), user(1L),
+                LocalDateTime.now().plusDays(1));
+        when(userService.getAuthenticatedUser()).thenReturn(user(3L));
+        when(inviteRepository.findById(5L)).thenReturn(Optional.of(invite));
+
+        assertThatThrownBy(() -> projectInviteService.reject(5L))
+                .isInstanceOf(ForbiddenException.class)
+                .hasMessage("This invitation does not belong to you");
+
+        verify(inviteRepository, never()).save(any());
+    }
+
+    @Test
+    void rejectDoesNotAllowRejectedInvitationToChangeStateAgain() {
+        ProjectInvite invite = invite(5L, project(10L, user(1L)), user(2L), user(1L),
+                LocalDateTime.now().plusDays(1));
+        invite.setStatus(InviteStatus.REJECTED);
+        when(userService.getAuthenticatedUser()).thenReturn(user(2L));
+        when(inviteRepository.findById(5L)).thenReturn(Optional.of(invite));
+
+        assertThatThrownBy(() -> projectInviteService.reject(5L))
+                .isInstanceOf(BadRequestException.class)
+                .hasMessage("Only pending invitations can be rejected");
+
+        assertThat(invite.getStatus()).isEqualTo(InviteStatus.REJECTED);
+        verify(inviteRepository, never()).save(any());
+    }
+
+    @Test
+    void rejectReturnsNotFoundForUnknownInvitation() {
+        when(userService.getAuthenticatedUser()).thenReturn(user(2L));
+        when(inviteRepository.findById(5L)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> projectInviteService.reject(5L))
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessage("Invitation not found");
+    }
+
     private void setupInviteAsOwner(User owner) {
         when(userService.getAuthenticatedUser()).thenReturn(owner);
         when(projectRepository.findById(10L)).thenReturn(Optional.of(project(10L, owner)));

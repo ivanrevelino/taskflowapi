@@ -88,4 +88,21 @@ public class ProjectInviteController {
         projectInviteService.accept(inviteId);
         return ResponseEntity.noContent().build();
     }
+
+    @PatchMapping("/me/invites/{inviteId}/reject")
+    @Operation(summary = "Reject a project invitation")
+    @ApiResponses({
+            @ApiResponse(responseCode = "204", description = "Invitation rejected successfully"),
+            @ApiResponse(responseCode = "400", description = "Invitation is not pending",
+                    content = @Content(schema = @Schema(implementation = RestErrorMessage.class))),
+            @ApiResponse(responseCode = "403", description = "Invitation does not belong to the authenticated user",
+                    content = @Content(schema = @Schema(implementation = RestErrorMessage.class))),
+            @ApiResponse(responseCode = "404", description = "Invitation not found",
+                    content = @Content(schema = @Schema(implementation = RestErrorMessage.class)))
+    })
+    public ResponseEntity<Void> reject(
+            @Parameter(description = "Invitation identifier", example = "1") @PathVariable Long inviteId) {
+        projectInviteService.reject(inviteId);
+        return ResponseEntity.noContent().build();
+    }
 }

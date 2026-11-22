@@ -10,7 +10,6 @@ import com.ivan.taskflowapi.exception.ResourceNotFoundException;
 import com.ivan.taskflowapi.mapper.ProjectMapper;
 import com.ivan.taskflowapi.mapper.ProjectMemberMapper;
 import com.ivan.taskflowapi.mapper.UserMapper;
-import com.ivan.taskflowapi.mapper.manual_mapper.ProjectMapperMnl;
 import com.ivan.taskflowapi.models.Project;
 import com.ivan.taskflowapi.models.ProjectMember;
 import com.ivan.taskflowapi.models.User;
@@ -18,16 +17,12 @@ import com.ivan.taskflowapi.repository.ProjectMemberRepository;
 import com.ivan.taskflowapi.repository.ProjectRepository;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.NonNull;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
