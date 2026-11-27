@@ -1,6 +1,7 @@
 package com.ivan.taskflowapi.controller;
 
 import com.ivan.taskflowapi.dto.project_member.AddMemberRequestDTO;
+import com.ivan.taskflowapi.dto.project_member.ChangePositionRequestDTO;
 import com.ivan.taskflowapi.dto.project_member.ProjectMemberResponseDTO;
 import com.ivan.taskflowapi.exception.BadRequestException;
 import com.ivan.taskflowapi.exception.ForbiddenException;
@@ -14,6 +15,8 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -23,6 +26,7 @@ import java.util.List;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -79,17 +83,19 @@ class ProjectMemberControllerTest {
         ProjectMemberResponseDTO member = new ProjectMemberResponseDTO();
         member.setId(5L);
         member.setRole(ProjectMemberRole.MEMBER);
-        Mockito.when(projectMemberService.findAll(1L)).thenReturn(List.of(member));
+        Mockito.when(projectMemberService.findAll(Mockito.eq(1L), Mockito.any(Pageable.class)))
+                .thenReturn(new PageImpl<>(List.of(member)));
 
         mockMvc.perform(get("/api/v1/projects/1/members"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].id").value(5L))
-                .andExpect(jsonPath("$[0].role").value("MEMBER"));
+                .andExpect(jsonPath("$.content[0].id").value(5L))
+                .andExpect(jsonPath("$.content[0].role").value("MEMBER"))
+                .andExpect(jsonPath("$.page.totalElements").value(1));
     }
 
     @Test
     void findAllMembersShouldReturnNotFoundWhenRequesterIsNotMember() throws Exception {
-        Mockito.when(projectMemberService.findAll(1L))
+        Mockito.when(projectMemberService.findAll(Mockito.eq(1L), Mockito.any(Pageable.class)))
                 .thenThrow(new ResourceNotFoundException("You are not a member of this project"));
 
         mockMvc.perform(get("/api/v1/projects/1/members"))
@@ -111,6 +117,37 @@ class ProjectMemberControllerTest {
 
         mockMvc.perform(delete("/api/v1/projects/1/members/2"))
                 .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void changePositionShouldReturnUpdatedMemberRole() throws Exception {
+        ChangePositionRequestDTO request = new ChangePositionRequestDTO(ProjectMemberRole.ADMIN);
+        ProjectMemberResponseDTO response = new ProjectMemberResponseDTO();
+        response.setId(5L);
+        response.setRole(ProjectMemberRole.ADMIN);
+        Mockito.when(projectMemberService.changePosition(1L, 5L, ProjectMemberRole.ADMIN))
+                .thenReturn(response);
+
+        mockMvc.perform(patch("/api/v1/projects/1/members/5/position")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(5L))
+                .andExpect(jsonPath("$.role").value("ADMIN"));
+
+        Mockito.verify(projectMemberService).changePosition(1L, 5L, ProjectMemberRole.ADMIN);
+    }
+
+    @Test
+    void changePositionShouldReturnBadRequestForInvalidRole() throws Exception {
+        ChangePositionRequestDTO request = new ChangePositionRequestDTO(ProjectMemberRole.OWNER);
+        Mockito.when(projectMemberService.changePosition(1L, 5L, ProjectMemberRole.OWNER))
+                .thenThrow(new BadRequestException("Role must be ADMIN or MEMBER"));
+
+        mockMvc.perform(patch("/api/v1/projects/1/members/5/position")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest());
     }
 
     @Test

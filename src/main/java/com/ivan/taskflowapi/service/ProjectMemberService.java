@@ -14,9 +14,9 @@ import com.ivan.taskflowapi.repository.ProjectMemberRepository;
 import com.ivan.taskflowapi.repository.ProjectRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -28,16 +28,14 @@ public class ProjectMemberService {
     private final ProjectMemberMapper projectMemberMapper;
     private final UserService userService;
 
-    public List<ProjectMemberResponseDTO> findAll(Long projectId) {
+    public Page<ProjectMemberResponseDTO> findAll(Long projectId, Pageable pageable) {
         User user = userService.getAuthenticatedUser();
 
         repository.findByProjectIdAndUser(projectId, user)
                 .orElseThrow(() -> new ResourceNotFoundException("You are not a member of this project"));
 
-        return repository.findByProjectId(projectId)
-                .stream()
-                .map(projectMemberMapper::toDTO)
-                .toList();
+        return repository.findByProjectId(projectId, pageable)
+                .map(projectMemberMapper::toDTO);
     }
 
     public void addOwner(Project project, User authenticatedUser) {
@@ -111,6 +109,29 @@ public class ProjectMemberService {
 
         repository.delete(member);
 
+    }
+
+    public ProjectMemberResponseDTO changePosition(Long projectId, Long memberId, ProjectMemberRole role) {
+        User owner = userService.getAuthenticatedUser();
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new ResourceNotFoundException("Project not found"));
+
+        validateProjectOwnerShip(project, owner);
+
+        ProjectMember member = repository.findByIdAndProjectId(memberId, projectId)
+                .orElseThrow(() -> new ResourceNotFoundException("Member not found"));
+
+        if (member.getUser().getId().equals(owner.getId())) {
+            throw new BadRequestException("You cannot change your own role");
+        }
+
+        if (role != ProjectMemberRole.ADMIN && role != ProjectMemberRole.MEMBER) {
+            throw new BadRequestException("Role must be ADMIN or MEMBER");
+        }
+
+        member.setRole(role);
+        ProjectMember saved = repository.save(member);
+        return projectMemberMapper.toDTO(saved);
     }
 
     private static void validateProjectOwnerShip(Project project, User owner) {
