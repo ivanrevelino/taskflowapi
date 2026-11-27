@@ -1,7 +1,18 @@
 services:
+
+  api:
+    container_name: taskflowapi
+    build: .
+    ports:
+      - "8080:8080"
+    env_file:
+      - .env
+    depends_on:
+      - postgres
+
   postgres:
     image: postgres:17
-    container_name: taskflow-postgres
+    container_name: taskflowdb
     restart: unless-stopped
 
     environment:
@@ -10,7 +21,7 @@ services:
       POSTGRES_PASSWORD: ${DB_PASSWORD}
 
     ports:
-      - "5434:5432"
+      - "5432:5432"
 
     volumes:
       - taskflow_postgres_data:/var/lib/postgresql/data
