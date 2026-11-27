@@ -33,3 +33,6 @@ jobs:
 
       - name: Run Tests
         run: ./mvnw -B test
+
+      - name: Build Docker image
+        run: docker build -t taskflowapi:ci .
