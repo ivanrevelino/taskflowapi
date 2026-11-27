@@ -3,25 +3,25 @@
 API REST para gerenciamento de projetos e tarefas, com autenticação JWT, controle de acesso baseado em papéis (roles) e suporte a membros de projeto, comentários aninhados e atribuição de tarefas.
 A aplicação permite que usuários criem projetos, convidem membros, gerenciem tarefas (com status TO_DO, IN_PROGRESS e COMPLETED), atribuam tarefas a si mesmos (claim/release), deixem comentários e respostas, e visualizem seus dados de perfil.
 ---
-🛠️ Stack Tecnológico
-Java 21
-Spring Boot 4.1.0
-Spring Security + JWT (java-jwt)
-Spring Data JPA
-PostgreSQL
-Flyway (migrações de banco)
-MapStruct 1.6.0
-Lombok
-SpringDoc OpenAPI 3 (Swagger)
-Docker + Docker Compose
+### 🛠️ Stack Tecnológico
+- Java 21
+- Spring Boot 4.1.0
+- Spring Security + JWT (java-jwt)
+- Spring Data JPA
+- PostgreSQL
+- Flyway (migrações de banco)
+- MapStruct 1.6.0
+- Lombok
+- SpringDoc OpenAPI 3 (Swagger)
+- Docker + Docker Compose
 ---
-📋 Pré-requisitos
-Java 21+
-Maven 3.6+ (ou use o Maven Wrapper `./mvnw`)
-Docker e Docker Compose (recomendado para o banco)
-PostgreSQL 12+ (caso não use Docker)
+### 📋 Pré-requisitos
+- Java 21+
+- Maven 3.6+ (ou use o Maven Wrapper `./mvnw`)
+- Docker e Docker Compose (recomendado para o banco)
+- PostgreSQL 12+ (caso não use Docker)
 ---
-⚙️ Configuração das Variáveis de Ambiente
+### ⚙️ Configuração das Variáveis de Ambiente
 Copie o arquivo de exemplo:
 ```bash
 cp .env.example .env
@@ -47,7 +47,7 @@ SERVER_PORT=8080
 ```
 > **Importante:** O Docker Compose expõe o PostgreSQL na porta **5434** (para não conflitar com uma instalação local na 5432). Ajuste o `DB_URL` de acordo.
 ---
-🐳 Subindo o Container (PostgreSQL)
+### 🐳 Subindo o Container (PostgreSQL)
 Na raiz do projeto, execute:
 ```bash
 docker compose up -d
@@ -58,7 +58,7 @@ Para parar:
 docker compose down
 ```
 ---
-🚀 Primeiros Passos
+### 🚀 Primeiros Passos
 Clone o repositório:
 ```bash
 git clone https://github.com/ivanrevelino/taskflowapi.git
@@ -73,7 +73,7 @@ Execute a aplicação:
 A API estará disponível em:  
 http://localhost:8080
 ---
-🔐 Autenticação
+### 🔐 Autenticação
 Todos os endpoints protegidos exigem o header:
 ```
 Authorization: Bearer SEU_JWT_TOKEN
@@ -129,7 +129,7 @@ Content-Type: application/json
 }
 ```
 ---
-📌 Exemplos de Endpoints
+### 📌 Exemplos de Endpoints
 Criar Projeto
 Request
 ```http
@@ -208,18 +208,20 @@ GET api/v1/projects/1/tasks/filter?status=TO_DO
 Authorization: Bearer SEU_TOKEN
 ```
 ---
-📖 Documentação Completa (Swagger)
+### 📖 Documentação Completa (Swagger)
 Para ver todos os endpoints, parâmetros, schemas e testar interativamente, acesse a documentação Swagger enquanto a aplicação estiver rodando:
 ```
 http://localhost:8080/api/v1/swagger-ui.html
 ```
 Também disponível em formato OpenAPI:
 ```
+
 http://localhost:8080api/v1/v3/api-docs
 ```
+
 Os endpoints protegidos usam JWT Bearer. Faça login, copie o `accessToken` e use **Authorize** no Swagger UI para testar as requisições autenticadas.
----
-🧪 Testes e Build
+
+### 🧪 Testes e Build
 ```bash
 # Rodar testes
 ./mvnw test
@@ -229,6 +231,7 @@ Os endpoints protegidos usam JWT Bearer. Faça login, copie o `accessToken` e us
 ```
 O artefato será gerado em `target/taskflowapi-0.0.1-SNAPSHOT.jar`.
 
-👤 Autor
+---
+👤 Autor:
 Ivan Revelino  
-*GitHub*: @ivanrevelino
+*GitHub*: [ivanrevelino](https://github.com/ivanrevelino)
